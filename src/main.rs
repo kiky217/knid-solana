@@ -1,7 +1,9 @@
 use knid_solana_core::rpc::{validate_mint, SolanaRpc};
 fn main() {
     let args: Vec<String> = std::env::args().collect();
-    if (args.len() != 4 && !(args.len() == 5 && args[1] == "scan-pump-history"))
+    if (args.len() != 4
+        && !(args.len() == 5 && args[1] == "scan-pump-history")
+        && !((args.len() == 5 || args.len() == 6) && args[1] == "scan-pump-pool-history"))
         || !matches!(
             args[1].as_str(),
             "inspect-mint"
@@ -11,6 +13,7 @@ fn main() {
                 | "inspect-deltas"
                 | "inspect-pump-trades"
                 | "scan-pump-history"
+                | "scan-pump-pool-history"
                 | "discover-pools"
         )
     {
@@ -33,6 +36,53 @@ fn main() {
             std::process::exit(2)
         }
     };
+    if args[1] == "scan-pump-pool-history" {
+        let pool = &args[4];
+        let result = knid_solana_core::backfill::scan_pool_trade_events_from(
+            &client,
+            address,
+            pool,
+            10,
+            2,
+            args.get(5).map(String::as_str),
+        );
+        match result {
+            Ok(batch) => {
+                for row in &batch.trades {
+                    println!(
+                        "slot={} signature={} mint={} event_index={} side={} price_sol={:.14}",
+                        row.slot,
+                        row.signature,
+                        row.event.mint,
+                        row.event.event_index,
+                        if row.event.is_buy { "BUY" } else { "SELL" },
+                        row.price_sol
+                    );
+                }
+                for interval_s in [1, 30, 600] {
+                    let candles =
+                        knid_solana_core::sol_candles::aggregate_sol(&batch.trades, interval_s)
+                            .unwrap_or_else(|e| {
+                                eprintln!("invalid OHLCV: {e:?}");
+                                std::process::exit(1)
+                            });
+                    println!(
+                        "tf_seconds={} candles={} trades={}",
+                        interval_s,
+                        candles.len(),
+                        candles.iter().map(|c| c.trades).sum::<u64>()
+                    );
+                }
+                println!("scanned_signatures={} decoded_trade_events={} reached_oldest={} next_cursor={:?} coverage={} pool={} mint_membership_derived_from_trade_event=true",
+                    batch.scanned_signatures,batch.trades.len(),batch.reached_oldest,batch.next_cursor,batch.coverage_scope,pool);
+                return;
+            }
+            Err(e) => {
+                eprintln!("pool scan failed closed: {e:?}");
+                std::process::exit(1)
+            }
+        }
+    }
     match args[1].as_str() {
         "discover-pools" => {
             match knid_solana_core::pool_discovery::discover_pumpfun_pools(&client,address) {

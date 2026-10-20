@@ -51,6 +51,59 @@ pub fn scan_mint_trade_events_from(
     max_pages: usize,
     start_cursor: Option<&str>,
 ) -> Result<HistoryResult, RpcError> {
+    scan_events_for_address_from(
+        rpc,
+        mint,
+        mint,
+        page_limit,
+        max_pages,
+        start_cursor,
+        "mint_address_only_not_all_pools",
+    )
+}
+
+/// Scan pool-address history, verifying Pump.fun account ownership and filtering
+/// decoded trade events by target mint. This is not proof of exhaustive DEX coverage.
+pub fn scan_pool_trade_events_from(
+    rpc: &SolanaRpc,
+    mint: &str,
+    pool_address: &str,
+    page_limit: usize,
+    max_pages: usize,
+    start_cursor: Option<&str>,
+) -> Result<HistoryResult, RpcError> {
+    crate::rpc::validate_mint(pool_address)?;
+    let state = rpc.call(
+        "getAccountInfo",
+        json!([pool_address, {"encoding":"base64","commitment":"finalized"}]),
+    )?;
+    let owner = state
+        .pointer("/result/value/owner")
+        .and_then(serde_json::Value::as_str)
+        .ok_or(RpcError::InvalidResponse)?;
+    if owner != crate::pumpfun_candidate::PUMPFUN_PROGRAM {
+        return Err(RpcError::ProgramMismatch);
+    }
+    scan_events_for_address_from(
+        rpc,
+        mint,
+        pool_address,
+        page_limit,
+        max_pages,
+        start_cursor,
+        "pumpfun_pool_address_only_not_all_venues",
+    )
+}
+
+fn scan_events_for_address_from(
+    rpc: &SolanaRpc,
+    mint: &str,
+    history_address: &str,
+    page_limit: usize,
+    max_pages: usize,
+    start_cursor: Option<&str>,
+    coverage_scope: &'static str,
+) -> Result<HistoryResult, RpcError> {
     if let Some(signature) = start_cursor {
         if !bs58::decode(signature)
             .into_vec()
@@ -68,7 +121,9 @@ pub fn scan_mint_trade_events_from(
     let mut trades = Vec::new();
     let mut reached_oldest = false;
     for _ in 0..max_pages {
-        let rows = retry_rate_limit(|| rpc.signatures_page(mint, page_limit, cursor.as_deref()))?;
+        let rows = retry_rate_limit(|| {
+            rpc.signatures_page(history_address, page_limit, cursor.as_deref())
+        })?;
         let next = scan.ingest_page(&rows, page_limit)?;
         for row in &rows {
             if row.has_error {
@@ -112,7 +167,7 @@ pub fn scan_mint_trade_events_from(
         pages: scan.pages(),
         next_cursor: cursor,
         reached_oldest,
-        coverage_scope: "mint_address_only_not_all_pools",
+        coverage_scope,
     })
 }
 #[cfg(test)]
