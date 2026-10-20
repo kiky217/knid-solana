@@ -33,7 +33,7 @@ async fn run(ca: &str, url: &str, seconds: u64) -> Result<(), String> {
         .and_then(Value::as_u64)
         .ok_or("WS_SUBSCRIBE_REJECTED")?;
     println!(
-        "SUBSCRIBED subscription={} commitment=processed coverage=mint_mentions_only",
+        "SUBSCRIBED subscription={} commitment=processed coverage=single_address_mentions_only",
         subscription
     );
     let mut seen = HashSet::new();
@@ -77,7 +77,7 @@ async fn run(ca: &str, url: &str, seconds: u64) -> Result<(), String> {
         }
     }
     println!(
-        "STREAM_PROBE_END notifications={} duplicates={} coverage=mint_mentions_only",
+        "STREAM_PROBE_END notifications={} duplicates={} coverage=single_address_mentions_only",
         notifications, duplicates
     );
     let _ = socket.close(None).await;
