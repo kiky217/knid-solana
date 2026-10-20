@@ -11,9 +11,10 @@ fn main() {
                 | "inspect-deltas"
                 | "inspect-pump-trades"
                 | "scan-pump-history"
+                | "discover-pools"
         )
     {
-        eprintln!("usage: knid-solana-core <inspect-mint|inspect-signatures|inspect-history|inspect-transaction|inspect-deltas|inspect-pump-trades|scan-pump-history> <https-rpc-url> <mint-or-account-address>");
+        eprintln!("usage: knid-solana-core <inspect-mint|inspect-signatures|inspect-history|inspect-transaction|inspect-deltas|inspect-pump-trades|scan-pump-history|discover-pools> <https-rpc-url> <mint-or-account-address>");
         std::process::exit(2)
     }
     let address = &args[3];
@@ -33,6 +34,17 @@ fn main() {
         }
     };
     match args[1].as_str() {
+        "discover-pools" => {
+            match knid_solana_core::pool_discovery::discover_pumpfun_pools(&client,address) {
+                Ok(pools)=>{
+                    for pool in &pools {
+                        println!("pool={} dex=pump-fun owner={} owner_verified={} mint_membership_verified={}",pool.address,pool.owner_program,pool.onchain_owner_verified,pool.mint_membership_verified);
+                    }
+                    println!("pumpfun_pool_candidates={} source=geckoterminal_with_rpc_owner_check",pools.len());
+                }
+                Err(e)=>{eprintln!("pool discovery failed: {e:?}");std::process::exit(1)}
+            }
+        },
         "scan-pump-history" => {
             let result=knid_solana_core::backfill::scan_mint_trade_events_from(&client,address,10,2,args.get(4).map(String::as_str));
             match result {

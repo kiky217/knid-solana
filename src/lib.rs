@@ -4,6 +4,7 @@ pub mod history;
 pub mod ingest;
 pub mod liquidity;
 pub mod orders;
+pub mod pool_discovery;
 pub mod pumpfun_candidate;
 pub mod pumpfun_trade;
 pub mod reconstruction;
