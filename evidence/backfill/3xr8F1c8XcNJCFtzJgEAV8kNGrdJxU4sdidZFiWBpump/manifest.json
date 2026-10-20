@@ -1,0 +1,22 @@
+{
+  "checkpoint_cursor": "2YcxP1BmruikBMLULQrvmPLEHKGNY1Ep1k6cPWxB4j19ajdXWJciJPhMW9DqSw4Cm6rsZHZJFMXjAKpNnCkJk3Hu",
+  "coverage": "mint_address_only_not_all_pools",
+  "files": [
+    {
+      "name": "page-000001.json",
+      "sha256": "801be702e23b3fcd483c60719036a4ee9c2f0522c38d53949494fa7742872113"
+    },
+    {
+      "name": "page-000002.json",
+      "sha256": "b95e068bbe2c0c36b53a5ebc8aa04c60e2b93ae7af0396f111b9154e60bc7df0"
+    }
+  ],
+  "historical_complete": false,
+  "mint": "3xr8F1c8XcNJCFtzJgEAV8kNGrdJxU4sdidZFiWBpump",
+  "scanned_signatures": 40,
+  "schema": 1,
+  "source": "Solana finalized JSON-RPC via read-only Pump.fun TradeEvent decoder",
+  "timestamp_precision": "seconds_not_ms",
+  "trade_event_count": 29,
+  "verification_note": "Development evidence only, not EG canonical VERIFIED proof"
+}
