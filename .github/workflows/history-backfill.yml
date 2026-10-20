@@ -1,5 +1,8 @@
 name: Resumable Solana Historical Backfill
 on:
+  push:
+    paths:
+      - ".github/workflows/history-backfill.yml"
   workflow_dispatch:
   schedule:
     - cron: "17 * * * *"
