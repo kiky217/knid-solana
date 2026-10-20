@@ -41,11 +41,29 @@ pub fn scan_mint_trade_events(
     page_limit: usize,
     max_pages: usize,
 ) -> Result<HistoryResult, RpcError> {
+    scan_mint_trade_events_from(rpc, mint, page_limit, max_pages, None)
+}
+
+pub fn scan_mint_trade_events_from(
+    rpc: &SolanaRpc,
+    mint: &str,
+    page_limit: usize,
+    max_pages: usize,
+    start_cursor: Option<&str>,
+) -> Result<HistoryResult, RpcError> {
+    if let Some(signature) = start_cursor {
+        if !bs58::decode(signature)
+            .into_vec()
+            .is_ok_and(|v| v.len() == 64)
+        {
+            return Err(RpcError::InvalidAddress);
+        }
+    }
     if page_limit == 0 || page_limit > 100 || max_pages == 0 || max_pages > 10 {
         return Err(RpcError::InvalidResponse);
     }
     let (_, decimals, _) = retry_rate_limit(|| rpc.token_snapshot(mint))?;
-    let mut cursor: Option<String> = None;
+    let mut cursor: Option<String> = start_cursor.map(str::to_owned);
     let mut scan = HistoryScan::default();
     let mut trades = Vec::new();
     let mut reached_oldest = false;
@@ -110,6 +128,10 @@ mod tests {
         assert!(matches!(
             scan_mint_trade_events(&rpc, "invalid", 1, 11),
             Err(RpcError::InvalidResponse)
+        ));
+        assert!(matches!(
+            scan_mint_trade_events_from(&rpc, "invalid", 1, 1, Some("bad")),
+            Err(RpcError::InvalidAddress)
         ));
     }
 }

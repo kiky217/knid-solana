@@ -1,7 +1,7 @@
 use knid_solana_core::rpc::{validate_mint, SolanaRpc};
 fn main() {
     let args: Vec<String> = std::env::args().collect();
-    if args.len() != 4
+    if (args.len() != 4 && !(args.len() == 5 && args[1] == "scan-pump-history"))
         || !matches!(
             args[1].as_str(),
             "inspect-mint"
@@ -34,7 +34,7 @@ fn main() {
     };
     match args[1].as_str() {
         "scan-pump-history" => {
-            let result=knid_solana_core::backfill::scan_mint_trade_events(&client,address,10,2);
+            let result=knid_solana_core::backfill::scan_mint_trade_events_from(&client,address,10,2,args.get(4).map(String::as_str));
             match result {
                 Ok(result)=>{
                     for t in &result.trades {

@@ -6,6 +6,8 @@ import json
 import struct
 import subprocess
 import threading
+import sys
+import tempfile
 from http.server import BaseHTTPRequestHandler,ThreadingHTTPServer
 from pathlib import Path
 
@@ -41,7 +43,7 @@ class Fixture(BaseHTTPRequestHandler):
         elif method=="getTokenSupply":
             result={"value":{"amount":"1000000000000000","decimals":6}}
         elif method=="getSignaturesForAddress":
-            result=[{"signature":SIG,"slot":123,"blockTime":1_700_000_001,"err":None}]
+            result=[] if request["params"][1].get("before") else [{"signature":SIG,"slot":123,"blockTime":1_700_000_001,"err":None}]
         elif method=="getTransaction":
             result=None if self.missing else {"slot":123,"meta":{"err":None,"logMessages":[
                 f"Program {self.program} invoke [1]",pump_log(),f"Program {self.program} success"
@@ -73,7 +75,26 @@ def main():
         Fixture.missing=True
         missing=subprocess.run(command,text=True,capture_output=True,timeout=20)
         assert missing.returncode==1,missing
-        print("BACKFILL_FIXTURE_PASS; PUMPFUN_EVENT_DECODING_PASS; CANDLE_1S_600S_PASS; SPOOF_PROGRAM_REJECTED; MISSING_HISTORY_FAIL_CLOSED")
+        Fixture.program=PUMP
+        Fixture.missing=False
+        resumed=subprocess.run([*command,SIG],text=True,capture_output=True,timeout=20)
+        assert resumed.returncode==0,resumed.stderr
+        assert "scanned_signatures=0" in resumed.stdout,resumed.stdout
+        with tempfile.TemporaryDirectory() as directory:
+            runner=[sys.executable,str(ROOT/"backfill_resume.py"),"--ca",MINT,"--rpc",command[2],"--output",directory,"--max-batches","2"]
+            first=subprocess.run(runner,text=True,capture_output=True,timeout=20)
+            assert first.returncode==0,first.stderr
+            page=Path(directory)/"page-000001.json"
+            info=json.loads(page.read_text())
+            assert info["decoded_trade_events"]==1 and info["reached_oldest"]
+            again=subprocess.run(runner,text=True,capture_output=True,timeout=20)
+            assert again.returncode==0 and "ALREADY_COMPLETE" in again.stdout,again
+            assert len(list(Path(directory).glob("page-*.json")))==1
+            info["mint"]="wrong-mint"
+            page.write_text(json.dumps(info))
+            bad=subprocess.run(runner,text=True,capture_output=True,timeout=20)
+            assert bad.returncode!=0,bad
+        print("BACKFILL_FIXTURE_PASS; PUMPFUN_EVENT_DECODING_PASS; CANDLE_1S_600S_PASS; SPOOF_PROGRAM_REJECTED; MISSING_HISTORY_FAIL_CLOSED; CURSOR_RESUME_PASS; ATOMIC_CHECKPOINT_RESUME_PASS")
     finally:
         server.shutdown();server.server_close()
 if __name__=="__main__":main()
