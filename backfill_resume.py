@@ -67,7 +67,10 @@ def run(mint,rpc,output,max_batches):
             record={"schema":1,"mint":mint,"page":index,"start_cursor":cursor,
                     "next_cursor":next_cursor,"reached_oldest":done=="true",
                     "scanned_signatures":int(scanned),"rpc_pages":int(pages),
-                    "decoded_trade_events":int(events),"coverage":coverage,
+                    "decoded_trade_events":int(events),
+                    "unresolved_signatures":[line.split(" ",1)[0].split("=",1)[1]
+                        for line in result.stdout.splitlines() if line.startswith("unresolved_signature=")],
+                    "coverage":coverage,
                     "time_precision":"block_timestamp_seconds",
                     "raw_receipt":result.stdout}
             dest=output/f"page-{index:06d}.json"

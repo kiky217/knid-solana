@@ -73,6 +73,9 @@ fn main() {
                         candles.iter().map(|c| c.trades).sum::<u64>()
                     );
                 }
+                for sig in &batch.unresolved_signatures {
+                    println!("unresolved_signature={} reason=RPC_LOG_TRUNCATED", sig);
+                }
                 println!("scanned_signatures={} decoded_trade_events={} reached_oldest={} next_cursor={:?} coverage={} pool={} mint_membership_derived_from_trade_event=true",
                     batch.scanned_signatures,batch.trades.len(),batch.reached_oldest,batch.next_cursor,batch.coverage_scope,pool);
                 return;
@@ -110,6 +113,7 @@ fn main() {
                             println!("candle tf_s={} start_s={} open_sol={:.14} high_sol={:.14} low_sol={:.14} close_sol={:.14} volume_lamports={} volume_token_raw={} trades={} open_close_order_verified={}",interval_s,c.start_s,c.open_sol,c.high_sol,c.low_sol,c.close_sol,c.volume_lamports,c.volume_token_raw,c.trades,c.open_close_order_verified);
                         }
                     }
+                    for sig in &result.unresolved_signatures {println!("unresolved_signature={} reason=RPC_LOG_TRUNCATED",sig);}
                     println!("scanned_signatures={} pages={} decoded_trade_events={} reached_oldest={} next_cursor={:?} coverage={} ms_execution_precision=false",result.scanned_signatures,result.pages,result.trades.len(),result.reached_oldest,result.next_cursor,result.coverage_scope);
                 }
                 Err(e)=>{eprintln!("historical scan failed closed: {e:?}");std::process::exit(1)}

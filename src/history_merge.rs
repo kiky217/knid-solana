@@ -88,6 +88,7 @@ mod tests {
             next_cursor: None,
             reached_oldest: true,
             coverage_scope: "test_account_only",
+            unresolved_signatures: vec![],
         }
     }
     #[test]

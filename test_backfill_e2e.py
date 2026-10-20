@@ -33,6 +33,7 @@ def pump_log():
 class Fixture(BaseHTTPRequestHandler):
     program=PUMP
     missing=False
+    truncated=False
     def log_message(self,*_):pass
     def do_POST(self):
         n=int(self.headers["Content-Length"])
@@ -46,7 +47,8 @@ class Fixture(BaseHTTPRequestHandler):
             result=[] if request["params"][1].get("before") else [{"signature":SIG,"slot":123,"blockTime":1_700_000_001,"err":None}]
         elif method=="getTransaction":
             result=None if self.missing else {"slot":123,"meta":{"err":None,"logMessages":[
-                f"Program {self.program} invoke [1]",pump_log(),f"Program {self.program} success"
+                f"Program {self.program} invoke [1]",pump_log(),
+                *( ["Log truncated"] if self.truncated else [f"Program {self.program} success"] )
             ]}}
         else: result=None
         data=json.dumps({"jsonrpc":"2.0","id":1,"result":result}).encode()
@@ -77,6 +79,19 @@ def main():
         assert missing.returncode==1,missing
         Fixture.program=PUMP
         Fixture.missing=False
+        Fixture.truncated=True
+        truncated=subprocess.run(command,text=True,capture_output=True,timeout=20)
+        assert truncated.returncode==0,truncated.stderr
+        assert "unresolved_signature="+SIG in truncated.stdout,truncated.stdout
+        assert "decoded_trade_events=0" in truncated.stdout,truncated.stdout
+        with tempfile.TemporaryDirectory() as gapdir:
+            gaprunner=[sys.executable,str(ROOT/"backfill_resume.py"),"--ca",MINT,"--rpc",command[2],"--output",gapdir,"--max-batches","1"]
+            gaprun=subprocess.run(gaprunner,text=True,capture_output=True,timeout=20)
+            assert gaprun.returncode==0,gaprun.stderr
+            gap=json.loads((Path(gapdir)/"page-000001.json").read_text())
+            assert gap["unresolved_signatures"]==[SIG],gap
+            assert gap["decoded_trade_events"]==0,gap
+        Fixture.truncated=False
         resumed=subprocess.run([*command,SIG],text=True,capture_output=True,timeout=20)
         assert resumed.returncode==0,resumed.stderr
         assert "scanned_signatures=0" in resumed.stdout,resumed.stdout

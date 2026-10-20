@@ -33,6 +33,8 @@ pub struct HistoryResult {
     pub next_cursor: Option<String>,
     pub reached_oldest: bool,
     pub coverage_scope: &'static str,
+    /// Signatures whose RPC logs were truncated: must be backfilled independently.
+    pub unresolved_signatures: Vec<String>,
 }
 /// Scan a bounded mint-address history; pools require separate scans.
 pub fn scan_mint_trade_events(
@@ -119,6 +121,7 @@ fn scan_events_for_address_from(
     let mut cursor: Option<String> = start_cursor.map(str::to_owned);
     let mut scan = HistoryScan::default();
     let mut trades = Vec::new();
+    let mut unresolved_signatures = Vec::new();
     let mut reached_oldest = false;
     for _ in 0..max_pages {
         let rows = retry_rate_limit(|| {
@@ -141,6 +144,14 @@ fn scan_events_for_address_from(
                 .ok_or(RpcError::InvalidResponse)?;
             if tx.get("slot").and_then(serde_json::Value::as_u64) != Some(row.slot) {
                 return Err(RpcError::InvalidResponse);
+            }
+            let truncated = tx
+                .pointer("/meta/logMessages")
+                .and_then(serde_json::Value::as_array)
+                .is_some_and(|lines| lines.iter().any(|v| v.as_str() == Some("Log truncated")));
+            if truncated {
+                unresolved_signatures.push(row.signature.clone());
+                continue;
             }
             let events = decode_pumpfun_trade_logs(&response)?;
             for event in events {
@@ -168,6 +179,7 @@ fn scan_events_for_address_from(
         next_cursor: cursor,
         reached_oldest,
         coverage_scope,
+        unresolved_signatures,
     })
 }
 #[cfg(test)]
