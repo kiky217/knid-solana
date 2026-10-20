@@ -3,6 +3,7 @@ pub mod history;
 pub mod ingest;
 pub mod liquidity;
 pub mod orders;
+pub mod pumpfun_candidate;
 pub mod reconstruction;
 pub mod rpc;
 pub mod tick_ledger;
