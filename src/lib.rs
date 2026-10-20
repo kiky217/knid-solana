@@ -13,6 +13,7 @@ pub mod sol_candles;
 pub mod tick_ledger;
 pub mod token_deltas;
 pub mod transaction;
+pub mod ws_events;
 /// Deterministic, offline primitives. No RPC requests or wallet signing.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Swap {
