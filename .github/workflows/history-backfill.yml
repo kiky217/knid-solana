@@ -1,0 +1,73 @@
+name: Resumable Solana Historical Backfill
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 * * * *"
+permissions:
+  contents: write
+concurrency:
+  group: knid-solana-backfill
+  cancel-in-progress: false
+jobs:
+  history:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      CA: 3xr8F1c8XcNJCFtzJgEAV8kNGrdJxU4sdidZFiWBpump
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Build and check
+        run: |
+          cargo test --locked --quiet
+          cargo build --locked --quiet --bin knid-solana-core
+          python3 test_backfill_e2e.py
+      - name: Resume 2 bounded history batches
+        shell: bash
+        run: |
+          set -euo pipefail
+          folder="evidence/backfill/$CA"
+          python3 backfill_resume.py --ca "$CA" --output "$folder" --max-batches 2
+          python3 - "$folder" "$CA" <<'PY'
+          import hashlib, json, pathlib, sys
+          folder, ca = pathlib.Path(sys.argv[1]), sys.argv[2]
+          pages = sorted(folder.glob("page-*.json"))
+          items = [json.loads(p.read_text()) for p in pages]
+          assert items and all(
+              row["page"] == i + 1
+              and row["mint"] == ca
+              and row["start_cursor"] == (None if i == 0 else items[i - 1]["next_cursor"])
+              for i, row in enumerate(items)
+          )
+          manifest = {
+              "schema": 1, "mint": ca, "coverage": "mint_address_only_not_all_pools",
+              "historical_complete": items[-1]["reached_oldest"],
+              "scanned_signatures": sum(r["scanned_signatures"] for r in items),
+              "trade_event_count": sum(r["decoded_trade_events"] for r in items),
+              "unresolved_signatures": sum((r.get("unresolved_signatures", []) for r in items), []),
+              "checkpoint_cursor": items[-1]["next_cursor"],
+              "timestamp_precision": "seconds_not_ms",
+              "source": "Solana finalized JSON-RPC Pump.fun event decoder",
+              "files": [{"name": p.name, "sha256": hashlib.sha256(p.read_bytes()).hexdigest()} for p in pages],
+              "verification_note": "Read-only research evidence; not EG canonical VERIFIED",
+          }
+          (folder / "manifest.json").write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n")
+          print("BACKFILL", manifest["scanned_signatures"], manifest["trade_event_count"],
+                len(manifest["unresolved_signatures"]))
+          PY
+      - name: Commit evidence if changed
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add -- "evidence/backfill/$CA/"
+          if git diff --cached --quiet; then
+            echo "Nothing new to commit"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "evidence: automated finalized CA backfill checkpoints [skip ci]"
+          git push origin "HEAD:$GITHUB_REF_NAME"
