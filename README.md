@@ -30,7 +30,7 @@ The reported raw supply is the mint's current RPC value, **not a circulating-sup
 - No pool discovery, transaction decoding per Raydium/Orca/other DEX, WebSocket streaming, backfill or fork-aware persistence. **Never infer swaps directly from transfers.**
 - No verified CLMM active liquidity, historical circulating supply, oracle integration, price feeds or real PnL accounting beyond paper fills.
 - No signing, smart order routing, live buying/selling, market orders on-chain or wallet access.
-- Source is staged outside the canonical KNID-Solana EG-governed workspace. The canonical task must satisfy independent production E3 admission and auditable GitHub promotion first.
+- Source is published to GitHub main and present in the KNID-Solana workspace. Its GitHub commit is verified independently; EG canonical production E3 admission and promotion evidence have not been completed.
 
 Safety: use this code for development/testing; it is not a trading platform ready for funds.
 
@@ -45,4 +45,4 @@ This is account-address activity only; mint signatures do **not** enumerate all 
 - Rust: 30 unit tests passed, formatting and Clippy passed; mock JSON-RPC CLI and live read-only mainnet calls passed.
 - Candidate Evaluation Gateway: 345 tests passed, 1 skipped. A sandbox E3 Cargo transaction reached REGISTER → PRE → signed receipt → POST → SATISFIED.
 - Non-root worker: UID `daemon` used a distinct local Rust toolchain and signed receipt with replay checks; Unix-socket liveness attested separately.
-- **Not a production release:** canonical EG KNID-Solana task remains at CP4 as last verified. No production owner HITL, no canonical E3 promotion, no GitHub commit/push, and no live trading authority. Mock tests are not production authorization.
+- **Not a production release:** canonical EG KNID-Solana task remains at CP4 as last verified. No production owner HITL, no canonical E3 promotion evidence, and no live trading authority. The GitHub main commit is a development-source publication, not an EG-verified production promotion. Mock tests are not production authorization.
