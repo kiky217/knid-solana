@@ -44,7 +44,7 @@ jobs:
           )
           manifest = {
               "schema": 1, "mint": ca, "coverage": "mint_address_only_not_all_pools",
-              "historical_complete": items[-1]["reached_oldest"],
+              "historical_complete": items[-1]["reached_oldest"] and not any(r.get("unresolved_signatures") for r in items),
               "scanned_signatures": sum(r["scanned_signatures"] for r in items),
               "trade_event_count": sum(r["decoded_trade_events"] for r in items),
               "unresolved_signatures": sum((r.get("unresolved_signatures", []) for r in items), []),
@@ -62,7 +62,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git add -- "evidence/backfill/$CA/"
+          git add -- "evidence/backfill/$CA/"page-*.json "evidence/backfill/$CA/manifest.json"
           if git diff --cached --quiet; then
             echo "Nothing new to commit"
             exit 0

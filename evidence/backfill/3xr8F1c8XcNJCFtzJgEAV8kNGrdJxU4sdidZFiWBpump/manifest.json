@@ -1,5 +1,5 @@
 {
-  "checkpoint_cursor": "2yQCgZcPS7nHrWjnadLFpY94oYtqNUonSfd2VZuSoc5MVC26UXFchRhtDzNEYJt6R9jvvzRBwtRvKpSywfrinqaL",
+  "checkpoint_cursor": "9g5RGujyTqNtroPz4fkpaCMdjCWpBea8G75bRYjSZhTHhuo18zPABGw9AunUyPpGCckhMCZ2XxrGH1fYkErghgA",
   "coverage": "mint_address_only_not_all_pools",
   "files": [
     {
@@ -49,18 +49,52 @@
     {
       "name": "page-000012.json",
       "sha256": "bfbc18ee7ee8459f99e8f8a7c56f68c9cfdae03b1105d958a2d56e1f5150830c"
+    },
+    {
+      "name": "page-000013.json",
+      "sha256": "05cba64b7d7af0412d9ab94f6ea3a99fcfd2db2fa9683440446e26bcda064c37"
+    },
+    {
+      "name": "page-000014.json",
+      "sha256": "0bdbe5a3bdff3a2559cf63ef6c6d9ac3f7522ab407c7bf088308476709361595"
+    },
+    {
+      "name": "page-000015.json",
+      "sha256": "f475723bd25b99ca2d4c5819889a893a8f73790468aacf550e892ec3688d2195"
+    },
+    {
+      "name": "page-000016.json",
+      "sha256": "71ce2e008a2a13ec8cfc015efceecca6a5fbc7195bd624f789585edd9b8df2cc"
+    },
+    {
+      "name": "page-000017.json",
+      "sha256": "71f64c6712ff85871871b34aa0ef8054e7276e8b348e23f8040165256a8ccab6"
+    },
+    {
+      "name": "page-000018.json",
+      "sha256": "23443d513754a2166cb489b39d54f6ad6721d4451badb082edc7d7df4cc959c4"
+    },
+    {
+      "name": "page-000019.json",
+      "sha256": "2f1bdefe5ed5d782a64b89f1f3491bfef2490b078b4199e9c175ec42e40544de"
+    },
+    {
+      "name": "page-000020.json",
+      "sha256": "ff81cc495ddcb70a98dc24de04b4a9e8f636596dae74b975f6523225965e1ae2"
     }
   ],
   "historical_complete": false,
   "mint": "3xr8F1c8XcNJCFtzJgEAV8kNGrdJxU4sdidZFiWBpump",
-  "scanned_signatures": 240,
+  "scanned_signatures": 400,
   "schema": 1,
   "source": "Solana finalized JSON-RPC Pump.fun event decoder",
   "timestamp_precision": "seconds_not_ms",
-  "trade_event_count": 202,
+  "trade_event_count": 346,
   "unresolved_signatures": [
     "g1eLGnBzELSir83Wc3NeH3XmD7JdzMgQPqWwEEivT9paLj8TouLpg89RcN72tad2PK6zRHhEoZFD5x1SEW62hAE",
-    "2znbsqg3Yv3VH24JCAH5s4uqF7GkxhhCdY7j1vSXYjF5X5HXonD58CWfudujPfNKrDjEZq6B8BuNyEy6hVt7f2jk"
+    "2znbsqg3Yv3VH24JCAH5s4uqF7GkxhhCdY7j1vSXYjF5X5HXonD58CWfudujPfNKrDjEZq6B8BuNyEy6hVt7f2jk",
+    "4nV31h3exEE75BoCG5hvMoGVUfQ1fFhZgtzZeR13wP2eLp1u49i6gzxGpGk2p5cHwZFwwxDBkTRfU2vnWFSCP8df",
+    "4nLZiYEYkYgd4Yi2vncNpGJKEabB4sNkE3AorSxC5es24qCzTzbgjMSgLVPdbfVsVw9KAd3CzAqMMgZEpPsfrdMp"
   ],
-  "verification_note": "Read-only research evidence; not EG canonical VERIFIED"
+  "verification_note": "Research evidence not EG VERIFIED"
 }
