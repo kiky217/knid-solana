@@ -1,7 +1,7 @@
-//! Bounded read-only CA subscription probe; observations are provisional, not swaps.
+//! Bounded read-only CA subscription; decoded events remain provisional until finalized.
 use futures_util::{SinkExt, StreamExt};
 use knid_solana_core::rpc::validate_mint;
-use knid_solana_core::ws_events::parse_logs_notification;
+use knid_solana_core::ws_events::{parse_logs_notification, parse_provisional_pump_trades};
 use serde_json::{json, Value};
 use std::collections::HashSet;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
@@ -39,6 +39,8 @@ async fn run(ca: &str, url: &str, seconds: u64) -> Result<(), String> {
     let mut seen = HashSet::new();
     let mut notifications = 0_u64;
     let mut duplicates = 0_u64;
+    let mut provisional_trades = 0_u64;
+    let mut unresolved = 0_u64;
     let start = Instant::now();
     while start.elapsed() < Duration::from_secs(seconds) {
         let item = match timeout(Duration::from_secs(2), socket.next()).await {
@@ -71,14 +73,48 @@ async fn run(ca: &str, url: &str, seconds: u64) -> Result<(), String> {
                         "timestamp_semantics":"local_receive_time_not_block_execution"
                     })
                 );
+                match parse_provisional_pump_trades(&parsed, observed_ns) {
+                    Ok(trades) => {
+                        for trade in trades {
+                            if trade.event.mint != ca {
+                                continue;
+                            }
+                            provisional_trades += 1;
+                            println!(
+                                "{}",
+                                json!({
+                                    "signature":trade.signature,"slot":trade.slot,
+                                    "event_index":trade.event.event_index,
+                                    "mint":trade.event.mint,
+                                    "side":if trade.event.is_buy {"BUY"} else {"SELL"},
+                                    "sol_lamports":trade.event.sol_lamports,
+                                    "token_raw":trade.event.token_raw,
+                                    "event_timestamp_s":trade.event.timestamp_s,
+                                    "received_at_ns":trade.received_at_ns.to_string(),
+                                    "provisional_trade_payload":true,"finalized":false,
+                                    "coverage":"single_address_mentions_only"
+                                })
+                            );
+                        }
+                    }
+                    Err(_) => {
+                        unresolved += 1;
+                        println!(
+                            "{}",
+                            json!({"signature":event.signature,
+                            "unresolved":true,"reason":"LOG_DECODE_FAILED",
+                            "finalized":false})
+                        );
+                    }
+                }
             }
             Ok(None) => {}
             Err(_) => return Err("WS_INVALID_NOTIFICATION".into()),
         }
     }
     println!(
-        "STREAM_PROBE_END notifications={} duplicates={} coverage=single_address_mentions_only",
-        notifications, duplicates
+        "STREAM_PROBE_END notifications={} duplicates={} provisional_trades={} unresolved={} coverage=single_address_mentions_only",
+        notifications, duplicates, provisional_trades, unresolved
     );
     let _ = socket.close(None).await;
     Ok(())

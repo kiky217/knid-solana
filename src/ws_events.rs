@@ -1,7 +1,8 @@
 //! Observation-time Solana log feed messages.
 //! Received timestamps are local wall-clock observations, NOT block execution times.
+use crate::pumpfun_trade::{decode_pumpfun_trade_logs, PumpTradeEvent};
 use crate::rpc::RpcError;
-use serde_json::Value;
+use serde_json::{json, Value};
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ObservedSignature {
     pub signature: String,
@@ -55,6 +56,40 @@ pub fn parse_logs_notification(
         commitment: "processed",
     }))
 }
+/// Verified Pump.fun log payload observed at processed commitment.
+/// Provisional until independently matched to a finalized transaction.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct ProvisionalPumpTrade {
+    pub signature: String,
+    pub slot: u64,
+    pub received_at_ns: u128,
+    pub event: PumpTradeEvent,
+}
+pub fn parse_provisional_pump_trades(
+    value: &Value,
+    received_at_ns: u128,
+) -> Result<Vec<ProvisionalPumpTrade>, RpcError> {
+    let Some(observed) = parse_logs_notification(value, received_at_ns)? else {
+        return Ok(vec![]);
+    };
+    if !observed.execution_succeeded {
+        return Ok(vec![]);
+    }
+    let logs = value
+        .pointer("/params/result/value/logs")
+        .ok_or(RpcError::InvalidResponse)?;
+    let wrapped = json!({"result":{"meta":{"err":null,"logMessages":logs}}});
+    let events = decode_pumpfun_trade_logs(&wrapped)?;
+    Ok(events
+        .into_iter()
+        .map(|event| ProvisionalPumpTrade {
+            signature: observed.signature.clone(),
+            slot: observed.slot,
+            received_at_ns,
+            event,
+        })
+        .collect())
+}
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -70,6 +105,40 @@ mod tests {
         assert_eq!(tick.received_at_ns, 1_797_000_123_456_789_000);
         assert_eq!(tick.commitment, "processed");
         assert!(tick.execution_succeeded);
+    }
+    #[test]
+    fn provisional_trade_requires_valid_program_stack_and_complete_logs() {
+        use crate::pumpfun_candidate::PUMPFUN_PROGRAM;
+        use base64::{engine::general_purpose::STANDARD, Engine};
+        let mut bytes = vec![0xbd, 0xdb, 0x7f, 0xd3, 0x4e, 0xe6, 0x61, 0xee];
+        bytes.extend_from_slice(&[1; 32]);
+        bytes.extend_from_slice(&1_000_000_000_u64.to_le_bytes());
+        bytes.extend_from_slice(&2_000_000_u64.to_le_bytes());
+        bytes.push(1);
+        bytes.extend_from_slice(&[0; 32]);
+        bytes.extend_from_slice(&1_700_000_000_i64.to_le_bytes());
+        bytes.extend_from_slice(&[0; 32]);
+        let logs = vec![
+            format!("Program {PUMPFUN_PROGRAM} invoke [1]"),
+            format!("Program data: {}", STANDARD.encode(bytes)),
+            format!("Program {PUMPFUN_PROGRAM} success"),
+        ];
+        let mut notification = json!({"method":"logsNotification","params":{"result":{
+            "context":{"slot":123},"value":{"signature":SIG,"err":null,"logs":logs}
+        }}});
+        let observed =
+            parse_provisional_pump_trades(&notification, 1_797_000_000_123_456_789).unwrap();
+        assert_eq!(observed.len(), 1);
+        assert_eq!(observed[0].slot, 123);
+        assert_eq!(observed[0].event.price_sol(6), Ok(0.5));
+        notification["params"]["result"]["value"]["logs"]
+            .as_array_mut()
+            .unwrap()
+            .push(json!("Log truncated"));
+        assert_eq!(
+            parse_provisional_pump_trades(&notification, 100),
+            Err(RpcError::InvalidResponse)
+        );
     }
     #[test]
     fn ignores_subscription_ack() {
