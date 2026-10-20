@@ -330,5 +330,3 @@ mod tests {
         assert_eq!(a.buy(1.01, 2.0, 0.01), Err(MarketError::InvalidFraction))
     }
 }
-
-[executed on device: 6a59e52b5668 (5255b4bd-412b-4ac8-9b22-0b77cd4dee13)]

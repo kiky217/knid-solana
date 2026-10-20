@@ -128,5 +128,3 @@ mod tests {
         assert_eq!(l.candles(1000), Err(MarketError::OutOfOrder));
     }
 }
-
-[executed on device: 6a59e52b5668 (5255b4bd-412b-4ac8-9b22-0b77cd4dee13)]

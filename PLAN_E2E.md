@@ -20,5 +20,3 @@ Given only a Solana mint CA, discover trading venues from token creation, recons
 
 ## Engineering discipline
 Karpathy guidelines: minimal changes, tests first, explicit assumptions, no unasked trading functionality, no hardcoded DEX-specific logic in EG core, every claim tied to test output.
-
-[executed on device: 6a59e52b5668 (5255b4bd-412b-4ac8-9b22-0b77cd4dee13)]

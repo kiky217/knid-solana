@@ -47,5 +47,3 @@ if __name__=="__main__":
     ap=argparse.ArgumentParser();ap.add_argument("--ca",default="So11111111111111111111111111111111111111112")
     ap.add_argument("--limit",type=int,default=5)
     a=ap.parse_args();assert 1<=a.limit<=20;run(a.ca,a.limit)
-
-[executed on device: 6a59e52b5668 (5255b4bd-412b-4ac8-9b22-0b77cd4dee13)]
