@@ -1,3 +1,4 @@
+pub mod candle_gaps;
 pub mod ingest;
 pub mod liquidity;
 pub mod orders;

@@ -46,3 +46,7 @@ This is account-address activity only; mint signatures do **not** enumerate all 
 - Candidate Evaluation Gateway: 345 tests passed, 1 skipped. A sandbox E3 Cargo transaction reached REGISTER → PRE → signed receipt → POST → SATISFIED.
 - Non-root worker: UID `daemon` used a distinct local Rust toolchain and signed receipt with replay checks; Unix-socket liveness attested separately.
 - **Not a production release:** canonical EG KNID-Solana task remains at CP4 as last verified. No production owner HITL, no canonical E3 promotion evidence, and no live trading authority. The GitHub main commit is a development-source publication, not an EG-verified production promotion. Mock tests are not production authorization.
+
+## Optional chart-only candle gaps
+
+`candle_gaps::fill_interior_gaps(candles, interval_ms, max_insertions)` can fill bounded *interior* gaps for chart display. Filler candles inherit the last observed close but always have **0 trades and 0 volume**. They are synthetic visualization values, **not verified swaps, market quotes, or executable prices**. The function refuses unaligned, duplicate, or excessive gaps, and does not extrapolate beyond real observed trades. Raw `aggregate` continues to return only observed periods.
