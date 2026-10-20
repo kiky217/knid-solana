@@ -50,3 +50,7 @@ This is account-address activity only; mint signatures do **not** enumerate all 
 ## Optional chart-only candle gaps
 
 `candle_gaps::fill_interior_gaps(candles, interval_ms, max_insertions)` can fill bounded *interior* gaps for chart display. Filler candles inherit the last observed close but always have **0 trades and 0 volume**. They are synthetic visualization values, **not verified swaps, market quotes, or executable prices**. The function refuses unaligned, duplicate, or excessive gaps, and does not extrapolate beyond real observed trades. Raw `aggregate` continues to return only observed periods.
+
+## Read-only finalized transaction inspection
+
+The library method `SolanaRpc::finalized_transaction(signature)` queries `getTransaction` at `finalized` commitment with transaction version 0 support. It requires a 64-byte decoded base58 signature, checks slot, fee, execution error and valid account keys, and returns `None` when the transaction is unavailable. It **does not decode DEX swaps or infer trades from token transfers**. Future pool-specific parsers require approved program IDs and independent event validation.

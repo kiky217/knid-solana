@@ -3,6 +3,7 @@ pub mod ingest;
 pub mod liquidity;
 pub mod orders;
 pub mod rpc;
+pub mod transaction;
 /// Deterministic, offline primitives. No RPC requests or wallet signing.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Swap {
