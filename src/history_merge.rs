@@ -8,6 +8,7 @@ pub struct MergedHistory {
     pub trades: Vec<HistoricalTrade>,
     pub duplicate_events: usize,
     pub source_count: usize,
+    pub unresolved_signatures: Vec<String>,
     pub all_sources_reached_oldest: bool,
     pub complete_all_venues: bool,
 }
@@ -16,9 +17,16 @@ pub fn merge_history(results: Vec<HistoryResult>) -> Result<MergedHistory, RpcEr
     if results.is_empty() {
         return Err(RpcError::InvalidResponse);
     }
-    let all_sources_reached_oldest = results
+    let mut unresolved_signatures: Vec<String> = results
         .iter()
-        .all(|r| r.reached_oldest && r.next_cursor.is_none());
+        .flat_map(|r| r.unresolved_signatures.iter().cloned())
+        .collect();
+    unresolved_signatures.sort();
+    unresolved_signatures.dedup();
+    let all_sources_reached_oldest = unresolved_signatures.is_empty()
+        && results
+            .iter()
+            .all(|r| r.reached_oldest && r.next_cursor.is_none());
     let source_count = results.len();
     let mut events: BTreeMap<(String, usize), HistoricalTrade> = BTreeMap::new();
     let mut duplicate_events = 0;
@@ -57,6 +65,7 @@ pub fn merge_history(results: Vec<HistoryResult>) -> Result<MergedHistory, RpcEr
         trades,
         duplicate_events,
         source_count,
+        unresolved_signatures,
         all_sources_reached_oldest,
         complete_all_venues: false,
     })
@@ -102,6 +111,15 @@ mod tests {
         assert_eq!(m.duplicate_events, 1);
         assert!(m.all_sources_reached_oldest);
         assert!(!m.complete_all_venues);
+    }
+    #[test]
+    fn unresolved_gap_prevents_complete_coverage() {
+        let mut r = result(vec![tick("a", 1, 10)]);
+        r.unresolved_signatures.push("truncated-tx".into());
+        let merged = merge_history(vec![r]).unwrap();
+        assert_eq!(merged.unresolved_signatures, vec!["truncated-tx"]);
+        assert!(!merged.all_sources_reached_oldest);
+        assert!(!merged.complete_all_venues);
     }
     #[test]
     fn conflicting_duplicate_rejected() {
