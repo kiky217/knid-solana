@@ -4,6 +4,7 @@ pub mod ingest;
 pub mod liquidity;
 pub mod orders;
 pub mod pumpfun_candidate;
+pub mod pumpfun_trade;
 pub mod reconstruction;
 pub mod rpc;
 pub mod tick_ledger;

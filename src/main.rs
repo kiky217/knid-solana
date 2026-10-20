@@ -9,14 +9,17 @@ fn main() {
                 | "inspect-history"
                 | "inspect-transaction"
                 | "inspect-deltas"
+                | "inspect-pump-trades"
         )
     {
-        eprintln!("usage: knid-solana-core <inspect-mint|inspect-signatures|inspect-history|inspect-transaction|inspect-deltas> <https-rpc-url> <mint-or-account-address>");
+        eprintln!("usage: knid-solana-core <inspect-mint|inspect-signatures|inspect-history|inspect-transaction|inspect-deltas|inspect-pump-trades> <https-rpc-url> <mint-or-account-address>");
         std::process::exit(2)
     }
     let address = &args[3];
-    if !matches!(args[1].as_str(), "inspect-transaction" | "inspect-deltas")
-        && validate_mint(address).is_err()
+    if !matches!(
+        args[1].as_str(),
+        "inspect-transaction" | "inspect-deltas" | "inspect-pump-trades"
+    ) && validate_mint(address).is_err()
     {
         eprintln!("invalid address");
         std::process::exit(2)
@@ -29,6 +32,23 @@ fn main() {
         }
     };
     match args[1].as_str() {
+        "inspect-pump-trades" => {
+            let valid=bs58::decode(address).into_vec().is_ok_and(|b|b.len()==64);
+            if !valid {eprintln!("invalid transaction signature");std::process::exit(2)}
+            let response=client.call("getTransaction",serde_json::json!([address,{"encoding":"jsonParsed","commitment":"finalized","maxSupportedTransactionVersion":0}]));
+            let events=response.and_then(|r|knid_solana_core::pumpfun_trade::decode_pumpfun_trade_logs(&r));
+            match events {
+                Ok(events)=>{
+                    for event in &events {
+                        let decimals=match client.token_snapshot(&event.mint){Ok((_,d,_))=>d,Err(e)=>{eprintln!("mint validation failed: {e:?}");std::process::exit(1)}};
+                        let price=event.price_sol(decimals).unwrap_or_else(|e|{eprintln!("invalid trade price: {e:?}");std::process::exit(1)});
+                        println!("mint={} side={} timestamp_s={} sol_lamports={} token_raw={} price_sol={:.14} event_index={} verified_pumpfun_event=true",event.mint,if event.is_buy{"BUY"}else{"SELL"},event.timestamp_s,event.sol_lamports,event.token_raw,price,event.event_index);
+                    }
+                    println!("verified_pumpfun_event_count={}",events.len());
+                }
+                Err(e)=>{eprintln!("Pump.fun event decode failed: {e:?}");std::process::exit(1)}
+            }
+        },
         "inspect-deltas" => {
             let valid=bs58::decode(address).into_vec().is_ok_and(|b|b.len()==64);
             if !valid {eprintln!("invalid transaction signature");std::process::exit(2)}
