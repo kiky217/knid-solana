@@ -1,8 +1,11 @@
 pub mod candle_gaps;
+pub mod history;
 pub mod ingest;
 pub mod liquidity;
 pub mod orders;
+pub mod reconstruction;
 pub mod rpc;
+pub mod tick_ledger;
 pub mod transaction;
 /// Deterministic, offline primitives. No RPC requests or wallet signing.
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -185,6 +188,52 @@ impl PaperAccount {
 mod tests {
     use super::*;
     #[test]
+    fn tick_to_one_second_to_ten_minute_parity() {
+        let ticks = [
+            Swap {
+                timestamp_ms: 1_005,
+                price_usd: 2.0,
+                base_amount: 3.0,
+            },
+            Swap {
+                timestamp_ms: 1_127,
+                price_usd: 2.5,
+                base_amount: 4.0,
+            },
+            Swap {
+                timestamp_ms: 2_001,
+                price_usd: 1.9,
+                base_amount: 2.0,
+            },
+            Swap {
+                timestamp_ms: 599_990,
+                price_usd: 3.0,
+                base_amount: 1.0,
+            },
+        ];
+        let seconds = aggregate(&ticks, 1_000).unwrap();
+        assert_eq!(seconds.len(), 3);
+        assert_eq!(seconds[0].open, 2.0);
+        assert_eq!(seconds[0].high, 2.5);
+        assert_eq!(seconds[0].trades, 2);
+        assert_eq!(seconds[0].volume_base, 7.0);
+        let ten_min = aggregate(&ticks, 600_000).unwrap();
+        assert_eq!(ten_min.len(), 1);
+        assert_eq!(ten_min[0].trades, 4);
+        assert_eq!(ten_min[0].open, 2.0);
+        assert_eq!(ten_min[0].close, 3.0);
+        assert_eq!(ten_min[0].low, 1.9);
+        assert_eq!(ten_min[0].high, 3.0);
+        assert_eq!(
+            ten_min[0].volume_base,
+            seconds.iter().map(|c| c.volume_base).sum::<f64>()
+        );
+        assert_eq!(
+            ten_min[0].volume_quote,
+            seconds.iter().map(|c| c.volume_quote).sum::<f64>()
+        );
+    }
+    #[test]
     fn bars_align_and_are_true_ohlcv() {
         let s = [
             Swap {
@@ -281,3 +330,5 @@ mod tests {
         assert_eq!(a.buy(1.01, 2.0, 0.01), Err(MarketError::InvalidFraction))
     }
 }
+
+[executed on device: 6a59e52b5668 (5255b4bd-412b-4ac8-9b22-0b77cd4dee13)]

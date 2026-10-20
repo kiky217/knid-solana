@@ -12,7 +12,7 @@ pub enum RpcError {
     InvalidSupply,
 }
 pub const TOKEN_PROGRAM: &str = "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA";
-pub const TOKEN_2022_PROGRAM: &str = "TokenzQdBNbLqP5VEhdkAS6EPFyzTFnACjJCfC7JF";
+pub const TOKEN_2022_PROGRAM: &str = "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb";
 pub fn validate_mint(mint: &str) -> Result<(), RpcError> {
     let b = bs58::decode(mint)
         .into_vec()
@@ -150,6 +150,15 @@ mod tests {
         )
     }
     #[test]
+    fn accepts_real_token_2022_owner() {
+        assert_eq!(
+            TOKEN_2022_PROGRAM,
+            "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        );
+        let r = json!({"result":{"value":{"owner":TOKEN_2022_PROGRAM,"executable":false}}});
+        assert_eq!(parse_mint_owner(&r), Ok(TOKEN_2022_PROGRAM.to_owned()));
+    }
+    #[test]
     fn rejects_credentials_in_url() {
         assert!(SolanaRpc::new("https://user:pass@rpc.example/".into()).is_err())
     }
@@ -209,14 +218,32 @@ impl SolanaRpc {
         address: &str,
         limit: usize,
     ) -> Result<Vec<RecentSignature>, RpcError> {
+        self.signatures_page(address, limit, None)
+    }
+    /// Read-only historical pagination. `before` is an exclusive oldest-signature cursor.
+    pub fn signatures_page(
+        &self,
+        address: &str,
+        limit: usize,
+        before: Option<&str>,
+    ) -> Result<Vec<RecentSignature>, RpcError> {
         validate_mint(address)?;
+        if let Some(cursor) = before {
+            let bytes = bs58::decode(cursor)
+                .into_vec()
+                .map_err(|_| RpcError::InvalidAddress)?;
+            if bytes.len() != 64 {
+                return Err(RpcError::InvalidAddress);
+            }
+        }
         if !(1..=1000).contains(&limit) {
             return Err(RpcError::InvalidResponse);
         }
-        let result = self.call(
-            "getSignaturesForAddress",
-            json!([address,{"limit":limit,"commitment":"finalized"}]),
-        )?;
+        let mut options = json!({"limit":limit,"commitment":"finalized"});
+        if let Some(cursor) = before {
+            options["before"] = json!(cursor);
+        }
+        let result = self.call("getSignaturesForAddress", json!([address, options]))?;
         parse_signatures(&result, limit)
     }
 }
@@ -244,6 +271,22 @@ mod more_rpc_tests {
         )
     }
     #[test]
+    fn history_cursor_must_be_valid_signature() {
+        let rpc = SolanaRpc::new("http://127.0.0.1:1".into()).unwrap();
+        assert_eq!(
+            rpc.signatures_page(
+                "So11111111111111111111111111111111111111112",
+                100,
+                Some("bad")
+            ),
+            Err(RpcError::InvalidAddress)
+        );
+        assert_eq!(
+            rpc.signatures_page("So11111111111111111111111111111111111111112", 1001, None),
+            Err(RpcError::InvalidResponse)
+        );
+    }
+    #[test]
     fn rejects_oversized_page() {
         assert_eq!(
             parse_signatures(&json!({"result":[{},{}]}), 1),
@@ -251,3 +294,5 @@ mod more_rpc_tests {
         )
     }
 }
+
+[executed on device: 6a59e52b5668 (5255b4bd-412b-4ac8-9b22-0b77cd4dee13)]
