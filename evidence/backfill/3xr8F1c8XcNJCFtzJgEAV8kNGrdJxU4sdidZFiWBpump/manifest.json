@@ -1,5 +1,5 @@
 {
-  "checkpoint_cursor": "2YcxP1BmruikBMLULQrvmPLEHKGNY1Ep1k6cPWxB4j19ajdXWJciJPhMW9DqSw4Cm6rsZHZJFMXjAKpNnCkJk3Hu",
+  "checkpoint_cursor": "2bXxe7QPzqfrerHqXxges8n9NZ2iUSPE4eYcA7G2qjBgYgtuq91PiZbTRyTDNFYgqwLtzLhNNkFFBJunKDpwZS8r",
   "coverage": "mint_address_only_not_all_pools",
   "files": [
     {
@@ -9,14 +9,22 @@
     {
       "name": "page-000002.json",
       "sha256": "b95e068bbe2c0c36b53a5ebc8aa04c60e2b93ae7af0396f111b9154e60bc7df0"
+    },
+    {
+      "name": "page-000003.json",
+      "sha256": "a1f181af9ce2a591a31610d2a4ff53902c174e5f182be2e0e2458a8dd7f37b49"
+    },
+    {
+      "name": "page-000004.json",
+      "sha256": "2bcb3c32655a0e3fed63ffc5e45c6f1b19135b4eacfcacb8275643cf6b3a1bd4"
     }
   ],
   "historical_complete": false,
   "mint": "3xr8F1c8XcNJCFtzJgEAV8kNGrdJxU4sdidZFiWBpump",
-  "scanned_signatures": 40,
+  "scanned_signatures": 80,
   "schema": 1,
-  "source": "Solana finalized JSON-RPC via read-only Pump.fun TradeEvent decoder",
+  "source": "Solana finalized JSON-RPC Pump.fun event decoder",
   "timestamp_precision": "seconds_not_ms",
-  "trade_event_count": 29,
-  "verification_note": "Development evidence only, not EG canonical VERIFIED proof"
+  "trade_event_count": 67,
+  "verification_note": "Read-only research evidence; not EG canonical VERIFIED"
 }
