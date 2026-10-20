@@ -15,6 +15,8 @@ class Handler(BaseHTTPRequestHandler):
    result={"value":{"owner":"TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA","executable":False}}
   elif request.get("method")=="getTokenSupply":
    result={"value":{"amount":"1000000000","decimals":9}}
+  elif request.get("method")=="getTransaction":
+   result={"meta":{"err":None,"preTokenBalances":[{"accountIndex":3,"mint":MINT,"uiTokenAmount":{"amount":"100","decimals":9}}],"postTokenBalances":[{"accountIndex":3,"mint":MINT,"uiTokenAmount":{"amount":"150","decimals":9}}]}}
   else:result=None
   data=json.dumps({"jsonrpc":"2.0","id":1,"result":result}).encode()
   self.send_response(200);self.send_header("Content-Type","application/json");self.send_header("Content-Length",str(len(data)));self.end_headers();self.wfile.write(data)
@@ -28,6 +30,14 @@ def main():
   assert "raw_supply=1000000000 decimals=9" in out.stdout,out.stdout
   bad=subprocess.run([str(BIN),"inspect-mint",url,"not-base58"],text=True,capture_output=True,timeout=10)
   assert bad.returncode==2,bad
-  print("LIVE_CLI_MOCK_RPC_PASS; INVALID_MINT_FAIL_CLOSED_PASS")
+  # Exact 64-byte base58 signature: all-ones base58 encodes 64 zero bytes.
+  sig="1"*64
+  delta=subprocess.run([str(BIN),"inspect-deltas",url,sig],text=True,capture_output=True,timeout=10)
+  assert delta.returncode==0,delta.stderr
+  assert "before=100 after=150 decimals=9" in delta.stdout,delta.stdout
+  assert "verified_swap=false" in delta.stdout,delta.stdout
+  invalid=subprocess.run([str(BIN),"inspect-deltas",url,"bad"],text=True,capture_output=True,timeout=10)
+  assert invalid.returncode==2,invalid
+  print("LIVE_CLI_MOCK_RPC_PASS; INVALID_MINT_FAIL_CLOSED_PASS; BALANCE_DELTA_CLI_PASS; INVALID_SIGNATURE_FAIL_CLOSED_PASS")
  finally:srv.shutdown();srv.server_close()
 if __name__=="__main__":main()
