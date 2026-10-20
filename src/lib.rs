@@ -1,3 +1,4 @@
+pub mod backfill;
 pub mod candle_gaps;
 pub mod history;
 pub mod ingest;
@@ -7,6 +8,7 @@ pub mod pumpfun_candidate;
 pub mod pumpfun_trade;
 pub mod reconstruction;
 pub mod rpc;
+pub mod sol_candles;
 pub mod tick_ledger;
 pub mod token_deltas;
 pub mod transaction;

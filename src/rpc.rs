@@ -7,6 +7,8 @@ pub enum RpcError {
     InvalidAddress,
     InvalidEndpoint,
     Transport,
+    RateLimited,
+    HttpStatus(u16),
     InvalidResponse,
     ProgramMismatch,
     InvalidSupply,
@@ -89,7 +91,11 @@ impl SolanaRpc {
         let response = ureq::post(&self.endpoint)
             .timeout(Duration::from_secs(10))
             .send_json(request)
-            .map_err(|_| RpcError::Transport)?;
+            .map_err(|e| match e {
+                ureq::Error::Status(429, _) => RpcError::RateLimited,
+                ureq::Error::Status(status, _) => RpcError::HttpStatus(status),
+                _ => RpcError::Transport,
+            })?;
         const MAX_RPC_RESPONSE_BYTES: u64 = 4 * 1024 * 1024;
         let mut limited = response.into_reader().take(MAX_RPC_RESPONSE_BYTES + 1);
         let mut bytes = Vec::new();

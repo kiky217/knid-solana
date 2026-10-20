@@ -10,9 +10,10 @@ fn main() {
                 | "inspect-transaction"
                 | "inspect-deltas"
                 | "inspect-pump-trades"
+                | "scan-pump-history"
         )
     {
-        eprintln!("usage: knid-solana-core <inspect-mint|inspect-signatures|inspect-history|inspect-transaction|inspect-deltas|inspect-pump-trades> <https-rpc-url> <mint-or-account-address>");
+        eprintln!("usage: knid-solana-core <inspect-mint|inspect-signatures|inspect-history|inspect-transaction|inspect-deltas|inspect-pump-trades|scan-pump-history> <https-rpc-url> <mint-or-account-address>");
         std::process::exit(2)
     }
     let address = &args[3];
@@ -32,10 +33,30 @@ fn main() {
         }
     };
     match args[1].as_str() {
+        "scan-pump-history" => {
+            let result=knid_solana_core::backfill::scan_mint_trade_events(&client,address,10,2);
+            match result {
+                Ok(result)=>{
+                    for t in &result.trades {
+                        println!("slot={} signature={} mint={} side={} timestamp_s={} price_sol={:.14} token_raw={} sol_lamports={}",t.slot,t.signature,t.event.mint,if t.event.is_buy{"BUY"}else{"SELL"},t.event.timestamp_s,t.price_sol,t.event.token_raw,t.event.sol_lamports);
+                    }
+                    for interval_s in [1,30,600] {
+                        let candles=knid_solana_core::sol_candles::aggregate_sol(&result.trades,interval_s)
+                            .unwrap_or_else(|e|{eprintln!("candle reconstruction failed: {e:?}");std::process::exit(1)});
+                        println!("tf_seconds={} observed_candles={} reconstructed_trade_count={} source_coverage=partial",interval_s,candles.len(),candles.iter().map(|c|c.trades).sum::<u64>());
+                        for c in candles.iter().rev().take(3) {
+                            println!("candle tf_s={} start_s={} open_sol={:.14} high_sol={:.14} low_sol={:.14} close_sol={:.14} volume_lamports={} volume_token_raw={} trades={} open_close_order_verified={}",interval_s,c.start_s,c.open_sol,c.high_sol,c.low_sol,c.close_sol,c.volume_lamports,c.volume_token_raw,c.trades,c.open_close_order_verified);
+                        }
+                    }
+                    println!("scanned_signatures={} pages={} decoded_trade_events={} reached_oldest={} next_cursor={:?} coverage={} ms_execution_precision=false",result.scanned_signatures,result.pages,result.trades.len(),result.reached_oldest,result.next_cursor,result.coverage_scope);
+                }
+                Err(e)=>{eprintln!("historical scan failed closed: {e:?}");std::process::exit(1)}
+            }
+        },
         "inspect-pump-trades" => {
             let valid=bs58::decode(address).into_vec().is_ok_and(|b|b.len()==64);
             if !valid {eprintln!("invalid transaction signature");std::process::exit(2)}
-            let response=client.call("getTransaction",serde_json::json!([address,{"encoding":"jsonParsed","commitment":"finalized","maxSupportedTransactionVersion":0}]));
+            let response=client.call("getTransaction",serde_json::json!([address,{"encoding":"jsonParsed","commitment":"finalized","maxSupportedTransactionVersion":1}]));
             let events=response.and_then(|r|knid_solana_core::pumpfun_trade::decode_pumpfun_trade_logs(&r));
             match events {
                 Ok(events)=>{
@@ -52,7 +73,7 @@ fn main() {
         "inspect-deltas" => {
             let valid=bs58::decode(address).into_vec().is_ok_and(|b|b.len()==64);
             if !valid {eprintln!("invalid transaction signature");std::process::exit(2)}
-            let response=client.call("getTransaction",serde_json::json!([address,{"encoding":"json","commitment":"finalized","maxSupportedTransactionVersion":0}]));
+            let response=client.call("getTransaction",serde_json::json!([address,{"encoding":"json","commitment":"finalized","maxSupportedTransactionVersion":1}]));
             let deltas=response.and_then(|r|knid_solana_core::token_deltas::token_deltas(&r));
             match deltas {
                 Ok(rows)=>{for row in &rows {println!("mint={} index={} before={} after={} decimals={}",row.mint,row.account_index,row.before_raw,row.after_raw,row.decimals)}println!("token_delta_count={} verified_swap=false",rows.len())},

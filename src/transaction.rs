@@ -73,7 +73,7 @@ impl SolanaRpc {
             return Err(RpcError::InvalidAddress);
         }
         let response=self.call("getTransaction",
-            json!([signature,{"encoding":"json","commitment":"finalized","maxSupportedTransactionVersion":0}]))?;
+            json!([signature,{"encoding":"json","commitment":"finalized","maxSupportedTransactionVersion":1}]))?;
         parse_finalized_transaction(&response)
     }
 }

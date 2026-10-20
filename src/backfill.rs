@@ -1,0 +1,115 @@
+//! Bounded finalized account history scan. Not complete all-pool archival coverage.
+use crate::history::HistoryScan;
+use crate::pumpfun_trade::{decode_pumpfun_trade_logs, PumpTradeEvent};
+use crate::rpc::{RpcError, SolanaRpc};
+use serde_json::json;
+use std::time::Duration;
+
+// Retry 8s, then 60s, then return to 8s. Other errors fail closed.
+fn retry_rate_limit<T, F: FnMut() -> Result<T, RpcError>>(mut action: F) -> Result<T, RpcError> {
+    for seconds in [0, 8, 60, 8] {
+        if seconds > 0 {
+            std::thread::sleep(Duration::from_secs(seconds));
+        }
+        match action() {
+            Err(RpcError::RateLimited) => continue,
+            result => return result,
+        }
+    }
+    Err(RpcError::RateLimited)
+}
+#[derive(Debug, Clone)]
+pub struct HistoricalTrade {
+    pub signature: String,
+    pub slot: u64,
+    pub event: PumpTradeEvent,
+    pub price_sol: f64,
+}
+#[derive(Debug)]
+pub struct HistoryResult {
+    pub trades: Vec<HistoricalTrade>,
+    pub scanned_signatures: usize,
+    pub pages: usize,
+    pub next_cursor: Option<String>,
+    pub reached_oldest: bool,
+    pub coverage_scope: &'static str,
+}
+/// Scan a bounded mint-address history; pools require separate scans.
+pub fn scan_mint_trade_events(
+    rpc: &SolanaRpc,
+    mint: &str,
+    page_limit: usize,
+    max_pages: usize,
+) -> Result<HistoryResult, RpcError> {
+    if page_limit == 0 || page_limit > 100 || max_pages == 0 || max_pages > 10 {
+        return Err(RpcError::InvalidResponse);
+    }
+    let (_, decimals, _) = retry_rate_limit(|| rpc.token_snapshot(mint))?;
+    let mut cursor: Option<String> = None;
+    let mut scan = HistoryScan::default();
+    let mut trades = Vec::new();
+    let mut reached_oldest = false;
+    for _ in 0..max_pages {
+        let rows = retry_rate_limit(|| rpc.signatures_page(mint, page_limit, cursor.as_deref()))?;
+        let next = scan.ingest_page(&rows, page_limit)?;
+        for row in &rows {
+            if row.has_error {
+                continue;
+            }
+            std::thread::sleep(Duration::from_millis(750));
+            let response = retry_rate_limit(|| {
+                rpc.call("getTransaction",json!([
+                row.signature,{"encoding":"jsonParsed","commitment":"finalized","maxSupportedTransactionVersion":1}
+            ]))
+            })?;
+            let tx = response
+                .get("result")
+                .filter(|x| !x.is_null())
+                .ok_or(RpcError::InvalidResponse)?;
+            if tx.get("slot").and_then(serde_json::Value::as_u64) != Some(row.slot) {
+                return Err(RpcError::InvalidResponse);
+            }
+            let events = decode_pumpfun_trade_logs(&response)?;
+            for event in events {
+                if event.mint == mint {
+                    let price_sol = event.price_sol(decimals)?;
+                    trades.push(HistoricalTrade {
+                        signature: row.signature.clone(),
+                        slot: row.slot,
+                        event,
+                        price_sol,
+                    });
+                }
+            }
+        }
+        cursor = next;
+        if cursor.is_none() {
+            reached_oldest = true;
+            break;
+        }
+    }
+    Ok(HistoryResult {
+        trades,
+        scanned_signatures: scan.unique_count(),
+        pages: scan.pages(),
+        next_cursor: cursor,
+        reached_oldest,
+        coverage_scope: "mint_address_only_not_all_pools",
+    })
+}
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn rejects_unsafe_backfill_bounds() {
+        let rpc = SolanaRpc::new("http://127.0.0.1:1".into()).unwrap();
+        assert!(matches!(
+            scan_mint_trade_events(&rpc, "invalid", 0, 1),
+            Err(RpcError::InvalidResponse)
+        ));
+        assert!(matches!(
+            scan_mint_trade_events(&rpc, "invalid", 1, 11),
+            Err(RpcError::InvalidResponse)
+        ));
+    }
+}
