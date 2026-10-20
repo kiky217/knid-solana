@@ -1,6 +1,7 @@
 pub mod backfill;
 pub mod candle_gaps;
 pub mod history;
+pub mod history_merge;
 pub mod ingest;
 pub mod liquidity;
 pub mod orders;
