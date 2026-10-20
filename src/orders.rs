@@ -92,6 +92,21 @@ impl OrderEngine {
         if !execution.is_finite() || execution <= 0.0 {
             return Err(MarketError::InvalidPrice);
         }
+        // Limit execution must be measured against the simulated fill price,
+        // not merely the observed midpoint before slippage.
+        let limit = match order.kind {
+            OrderKind::Limit { limit } | OrderKind::StopLimit { limit, .. } => Some(limit),
+            _ => None,
+        };
+        if let Some(limit) = limit {
+            let within = match order.side {
+                Side::Buy => execution <= limit,
+                Side::Sell => execution >= limit,
+            };
+            if !within {
+                return Ok(OrderStatus::Pending);
+            }
+        }
         let qty = match order.side {
             Side::Buy => self
                 .account
@@ -163,6 +178,29 @@ mod tests {
             ),
             Ok(OrderStatus::Pending)
         )
+    }
+    #[test]
+    fn limit_buy_slippage_never_violates_maximum() {
+        let mut engine = OrderEngine::new(100.0).unwrap();
+        let before = engine.account;
+        assert_eq!(
+            engine.submit(order(Side::Buy, OrderKind::Limit { limit: 10.0 }), 10.0),
+            Ok(OrderStatus::Pending)
+        );
+        assert_eq!(engine.account, before);
+    }
+    #[test]
+    fn limit_sell_slippage_never_violates_minimum() {
+        let mut engine = OrderEngine::new(100.0).unwrap();
+        engine
+            .submit(order(Side::Buy, OrderKind::Market), 9.0)
+            .unwrap();
+        let before = engine.account;
+        assert_eq!(
+            engine.submit(order(Side::Sell, OrderKind::Limit { limit: 10.0 }), 10.0),
+            Ok(OrderStatus::Pending)
+        );
+        assert_eq!(engine.account, before);
     }
     #[test]
     fn sizing_zero_is_noop() {

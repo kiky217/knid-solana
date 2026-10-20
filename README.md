@@ -23,7 +23,7 @@ The reported raw supply is the mint's current RPC value, **not a circulating-sup
 - Normalized **verified** DEX swaps with duplicate rejection and chronological ordering.
 - OHLCV aggregation: 30 seconds, 1 minute, 5 minutes, 15 minutes, 1 hour, 4 hours, 1 day.
 - Explicit TVL and circulating market-cap calculations with independently provided asset USD quotes.
-- Paper orders: market, limit, stop, stop-limit, and percent sizing, fees and worst-case bounded simulated slippage.
+- Paper orders: market, limit, stop, stop-limit, and percent sizing, fees and worst-case bounded simulated slippage. Limit orders remain pending when the simulated fill price would violate their limit.
 - Offline mock RPC E2E and negative tests.
 
 ## Not implemented or authorized
@@ -42,7 +42,7 @@ This is account-address activity only; mint signatures do **not** enumerate all 
 
 ## Verified staging acceptance (2026-10-20)
 
-- Rust: 30 unit tests passed, formatting and Clippy passed; mock JSON-RPC CLI and live read-only mainnet calls passed.
+- Rust: 32 unit tests passed, formatting and Clippy passed; mock JSON-RPC CLI and live read-only mainnet calls passed.
 - Candidate Evaluation Gateway: 345 tests passed, 1 skipped. A sandbox E3 Cargo transaction reached REGISTER → PRE → signed receipt → POST → SATISFIED.
 - Non-root worker: UID `daemon` used a distinct local Rust toolchain and signed receipt with replay checks; Unix-socket liveness attested separately.
 - **Not a production release:** canonical EG KNID-Solana task remains at CP4 as last verified. No production owner HITL, no canonical E3 promotion evidence, and no live trading authority. The GitHub main commit is a development-source publication, not an EG-verified production promotion. Mock tests are not production authorization.
