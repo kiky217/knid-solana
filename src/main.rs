@@ -4,14 +4,20 @@ fn main() {
     if args.len() != 4
         || !matches!(
             args[1].as_str(),
-            "inspect-mint" | "inspect-signatures" | "inspect-history" | "inspect-transaction"
+            "inspect-mint"
+                | "inspect-signatures"
+                | "inspect-history"
+                | "inspect-transaction"
+                | "inspect-deltas"
         )
     {
-        eprintln!("usage: knid-solana-core <inspect-mint|inspect-signatures|inspect-history|inspect-transaction> <https-rpc-url> <mint-or-account-address>");
+        eprintln!("usage: knid-solana-core <inspect-mint|inspect-signatures|inspect-history|inspect-transaction|inspect-deltas> <https-rpc-url> <mint-or-account-address>");
         std::process::exit(2)
     }
     let address = &args[3];
-    if args[1] != "inspect-transaction" && validate_mint(address).is_err() {
+    if !matches!(args[1].as_str(), "inspect-transaction" | "inspect-deltas")
+        && validate_mint(address).is_err()
+    {
         eprintln!("invalid address");
         std::process::exit(2)
     }
@@ -23,6 +29,16 @@ fn main() {
         }
     };
     match args[1].as_str() {
+        "inspect-deltas" => {
+            let valid=bs58::decode(address).into_vec().is_ok_and(|b|b.len()==64);
+            if !valid {eprintln!("invalid transaction signature");std::process::exit(2)}
+            let response=client.call("getTransaction",serde_json::json!([address,{"encoding":"json","commitment":"finalized","maxSupportedTransactionVersion":0}]));
+            let deltas=response.and_then(|r|knid_solana_core::token_deltas::token_deltas(&r));
+            match deltas {
+                Ok(rows)=>{for row in &rows {println!("mint={} index={} before={} after={} decimals={}",row.mint,row.account_index,row.before_raw,row.after_raw,row.decimals)}println!("token_delta_count={} verified_swap=false",rows.len())},
+                Err(e)=>{eprintln!("token balance extraction failed: {e:?}");std::process::exit(1)}
+            }
+        },
         "inspect-transaction" => match client.finalized_transaction(address) {
             Ok(Some(tx)) => println!("slot={} block_time={:?} succeeded={} fee_lamports={} account_keys={} verified_swap=false", tx.slot,tx.block_time,tx.succeeded,tx.fee_lamports,tx.account_keys.len()),
             Ok(None) => println!("transaction_unavailable=true verified_swap=false"),
