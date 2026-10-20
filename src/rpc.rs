@@ -62,6 +62,8 @@ pub fn parse_mint_owner(value: &Value) -> Result<String, RpcError> {
 }
 pub struct SolanaRpc {
     endpoint: String,
+    // Reuse HTTP/TLS connections across sequential finalized reads.
+    agent: ureq::Agent,
 }
 impl SolanaRpc {
     pub fn new(endpoint: String) -> Result<Self, RpcError> {
@@ -74,7 +76,10 @@ impl SolanaRpc {
         if endpoint.contains('@') || endpoint.contains('#') || endpoint.contains(' ') {
             return Err(RpcError::InvalidEndpoint);
         }
-        Ok(Self { endpoint })
+        Ok(Self {
+            endpoint,
+            agent: ureq::AgentBuilder::new().build(),
+        })
     }
     pub fn call(&self, method: &str, params: Value) -> Result<Value, RpcError> {
         if !matches!(
@@ -88,7 +93,9 @@ impl SolanaRpc {
             return Err(RpcError::InvalidResponse);
         }
         let request = json!({"jsonrpc":"2.0","id":1,"method":method,"params":params});
-        let response = ureq::post(&self.endpoint)
+        let response = self
+            .agent
+            .post(&self.endpoint)
             .timeout(Duration::from_secs(10))
             .send_json(request)
             .map_err(|e| match e {

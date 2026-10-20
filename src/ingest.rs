@@ -1,6 +1,6 @@
 //! Deduplicate decoded, independently verified DEX swaps before OHLCV aggregation.
 use crate::{MarketError, Swap};
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 #[derive(Clone, Debug)]
 pub struct VerifiedDexSwap {
     pub signature: String,
@@ -15,7 +15,7 @@ pub struct VerifiedDexSwap {
 }
 #[derive(Default)]
 pub struct TradeLedger {
-    seen: HashSet<(String, u64, u16, Option<u16>)>,
+    seen: HashMap<(String, u64, u16, Option<u16>), Swap>,
     swaps: Vec<Swap>,
 }
 impl TradeLedger {
@@ -38,8 +38,17 @@ impl TradeLedger {
             return Err(MarketError::InvalidPrice);
         }
         let key = (s.signature, s.slot, s.ix, s.inner_ix);
-        if self.seen.contains(&key) {
-            return Ok(false);
+        let swap = Swap {
+            timestamp_ms: s.timestamp_ms,
+            price_usd: s.price_usd,
+            base_amount: s.base_amount,
+        };
+        if let Some(previous) = self.seen.get(&key) {
+            return if *previous == swap {
+                Ok(false)
+            } else {
+                Err(MarketError::ConflictingDuplicate)
+            };
         }
         if self
             .swaps
@@ -48,12 +57,8 @@ impl TradeLedger {
         {
             return Err(MarketError::OutOfOrder);
         }
-        self.seen.insert(key);
-        self.swaps.push(Swap {
-            timestamp_ms: s.timestamp_ms,
-            price_usd: s.price_usd,
-            base_amount: s.base_amount,
-        });
+        self.seen.insert(key, swap);
+        self.swaps.push(swap);
         Ok(true)
     }
     pub fn swaps(&self) -> &[Swap] {
@@ -83,6 +88,20 @@ mod tests {
         assert_eq!(l.insert(swap(), &allow), Ok(true));
         assert_eq!(l.insert(swap(), &allow), Ok(false));
         assert_eq!(l.swaps().len(), 1)
+    }
+    #[test]
+    fn conflicting_replay_is_rejected_without_mutation() {
+        let mut ledger = TradeLedger::default();
+        let allow = HashSet::from(["allow-dex".into()]);
+        assert_eq!(ledger.insert(swap(), &allow), Ok(true));
+        let mut conflicting = swap();
+        conflicting.price_usd = 9.0;
+        assert_eq!(
+            ledger.insert(conflicting, &allow),
+            Err(MarketError::ConflictingDuplicate)
+        );
+        assert_eq!(ledger.swaps().len(), 1);
+        assert_eq!(ledger.swaps()[0].price_usd, 1.5);
     }
     #[test]
     fn different_instruction_counts_as_new() {

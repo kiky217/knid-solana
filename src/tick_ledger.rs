@@ -1,9 +1,9 @@
 //! Deterministic tick ledger for individually verified DEX swap events.
 //! Timestamp is block-time estimate in milliseconds, not transaction millisecond precision.
 use crate::{aggregate, Candle, MarketError, Swap};
-use std::collections::HashSet;
+use std::collections::HashMap;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct VerifiedTick {
     pub signature: String,
     pub slot: u64,
@@ -17,7 +17,7 @@ pub struct VerifiedTick {
 }
 #[derive(Default)]
 pub struct TickLedger {
-    keys: HashSet<(String, u16, Option<u16>, String)>,
+    keys: HashMap<(String, u16, Option<u16>, String), usize>,
     ticks: Vec<VerifiedTick>,
 }
 impl TickLedger {
@@ -37,11 +37,35 @@ impl TickLedger {
             tick.inner_ix,
             tick.pool.clone(),
         );
-        if !self.keys.insert(key) {
-            return Ok(false);
+        if let Some(&index) = self.keys.get(&key) {
+            return if self.ticks[index] == tick {
+                Ok(false)
+            } else {
+                Err(MarketError::ConflictingDuplicate)
+            };
         }
+        self.keys.insert(key, self.ticks.len());
         self.ticks.push(tick);
         Ok(true)
+    }
+    /// Discard a non-finalized fork from the first replaced slot onward.
+    /// The caller must independently establish the canonical fork boundary.
+    pub fn rollback_from_slot(&mut self, first_replaced_slot: u64) -> usize {
+        let old_len = self.ticks.len();
+        self.ticks.retain(|tick| tick.slot < first_replaced_slot);
+        self.keys.clear();
+        for (index, tick) in self.ticks.iter().enumerate() {
+            self.keys.insert(
+                (
+                    tick.signature.clone(),
+                    tick.ix,
+                    tick.inner_ix,
+                    tick.pool.clone(),
+                ),
+                index,
+            );
+        }
+        old_len - self.ticks.len()
     }
     pub fn ordered(&self) -> Vec<&VerifiedTick> {
         let mut rows: Vec<_> = self.ticks.iter().collect();
@@ -119,6 +143,33 @@ mod tests {
         assert_eq!(ten[0].high, 5.0);
         assert_eq!(ten[0].trades, 3);
         assert_eq!(seconds.iter().map(|c| c.trades).sum::<u64>(), 3);
+    }
+    #[test]
+    fn conflicting_duplicate_fails_closed_without_changing_candles() {
+        let mut ledger = TickLedger::default();
+        let original = tick(2, 0, 0, 1000, 2.0);
+        assert_eq!(ledger.insert(original.clone()), Ok(true));
+        assert_eq!(ledger.insert(original), Ok(false));
+        assert_eq!(
+            ledger.insert(tick(2, 0, 0, 1000, 9.0)),
+            Err(MarketError::ConflictingDuplicate)
+        );
+        assert_eq!(ledger.len(), 1);
+        assert_eq!(ledger.candles(1000).unwrap()[0].close, 2.0);
+    }
+    #[test]
+    fn rollback_rebuilds_keys_and_candles() {
+        let mut ledger = TickLedger::default();
+        ledger.insert(tick(1, 0, 0, 1000, 1.0)).unwrap();
+        ledger.insert(tick(2, 0, 0, 2000, 2.0)).unwrap();
+        ledger.insert(tick(3, 0, 0, 3000, 3.0)).unwrap();
+        assert_eq!(ledger.rollback_from_slot(2), 2);
+        assert_eq!(ledger.len(), 1);
+        assert_eq!(ledger.insert(tick(2, 0, 0, 2000, 20.0)), Ok(true));
+        let candles = ledger.candles(1000).unwrap();
+        assert_eq!(candles.len(), 2);
+        assert_eq!(candles[1].close, 20.0);
+        assert_eq!(ledger.rollback_from_slot(9), 0);
     }
     #[test]
     fn contradictory_block_time_fails_closed() {

@@ -80,6 +80,13 @@ pub fn decode_pumpfun_trade_logs(response: &Value) -> Result<Vec<PumpTradeEvent>
         .get("logMessages")
         .and_then(Value::as_array)
         .ok_or(RpcError::InvalidResponse)?;
+    // Partial logs cannot establish a complete set of swaps for this transaction.
+    if logs
+        .iter()
+        .any(|line| line.as_str() == Some("Log truncated"))
+    {
+        return Err(RpcError::InvalidResponse);
+    }
     let mut stack: Vec<&str> = Vec::new();
     let mut events = Vec::new();
     for line in logs {
@@ -176,6 +183,18 @@ mod tests {
                 format!("Program {PUMPFUN_PROGRAM} invoke [1]"),
                 log,
                 format!("Program {PUMPFUN_PROGRAM} success")
+            ])),
+            Err(RpcError::InvalidResponse)
+        );
+    }
+    #[test]
+    fn rejects_truncated_logs_even_after_a_valid_event() {
+        assert_eq!(
+            decode_pumpfun_trade_logs(&response(vec![
+                format!("Program {PUMPFUN_PROGRAM} invoke [1]"),
+                log_data(),
+                format!("Program {PUMPFUN_PROGRAM} success"),
+                "Log truncated".into(),
             ])),
             Err(RpcError::InvalidResponse)
         );

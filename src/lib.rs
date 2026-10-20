@@ -39,6 +39,7 @@ pub enum MarketError {
     InvalidVolume,
     InvalidInterval,
     OutOfOrder,
+    ConflictingDuplicate,
     NonFinite,
     InsufficientFunds,
     InvalidFraction,
