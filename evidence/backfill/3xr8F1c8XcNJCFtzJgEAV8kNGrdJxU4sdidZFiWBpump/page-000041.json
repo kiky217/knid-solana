@@ -1,0 +1,15 @@
+{
+  "coverage": "mint_address_only_not_all_pools",
+  "decoded_trade_events": 1,
+  "mint": "3xr8F1c8XcNJCFtzJgEAV8kNGrdJxU4sdidZFiWBpump",
+  "next_cursor": "3xr8RpFje4EK9sj6g7wQu2msUnjCWXo5mrKunrvhEEcFHtTnVspVUa81QbFZxaEEdv7FVx7ruHrnsxFofKWPSXDk",
+  "page": 41,
+  "raw_receipt": "slot=459296342 signature=3BV7ZTvUgAfpvosxAffrVnUmyfjcBjqjDYJzWQmWUjNG8VqgKezMUiSjCaFT6kXX2P1DjwUR5PSC35qqC5TKYoHy mint=3xr8F1c8XcNJCFtzJgEAV8kNGrdJxU4sdidZFiWBpump side=BUY timestamp_s=1792513748 price_sol=0.00000010377753 token_raw=19034052873 sol_lamports=1975307\ntf_seconds=1 observed_candles=1 reconstructed_trade_count=1 source_coverage=partial\ncandle tf_s=1 start_s=1792513748 open_sol=0.00000010377753 high_sol=0.00000010377753 low_sol=0.00000010377753 close_sol=0.00000010377753 volume_lamports=1975307 volume_token_raw=19034052873 trades=1 open_close_order_verified=true\ntf_seconds=30 observed_candles=1 reconstructed_trade_count=1 source_coverage=partial\ncandle tf_s=30 start_s=1792513740 open_sol=0.00000010377753 high_sol=0.00000010377753 low_sol=0.00000010377753 close_sol=0.00000010377753 volume_lamports=1975307 volume_token_raw=19034052873 trades=1 open_close_order_verified=true\ntf_seconds=600 observed_candles=1 reconstructed_trade_count=1 source_coverage=partial\ncandle tf_s=600 start_s=1792513200 open_sol=0.00000010377753 high_sol=0.00000010377753 low_sol=0.00000010377753 close_sol=0.00000010377753 volume_lamports=1975307 volume_token_raw=19034052873 trades=1 open_close_order_verified=true\nscanned_signatures=20 pages=2 decoded_trade_events=1 reached_oldest=false next_cursor=Some(\"3xr8RpFje4EK9sj6g7wQu2msUnjCWXo5mrKunrvhEEcFHtTnVspVUa81QbFZxaEEdv7FVx7ruHrnsxFofKWPSXDk\") coverage=mint_address_only_not_all_pools ms_execution_precision=false\n",
+  "reached_oldest": false,
+  "rpc_pages": 2,
+  "scanned_signatures": 20,
+  "schema": 1,
+  "start_cursor": "5qRL28fffZjxjue5HjZ5Sx7cq8FkSRafCgwYXp4RDrTB98Fun9oNxJeQdt6vLguuP3ahW7o3zsbgqLi3Bk4jgYi6",
+  "time_precision": "block_timestamp_seconds",
+  "unresolved_signatures": []
+}
