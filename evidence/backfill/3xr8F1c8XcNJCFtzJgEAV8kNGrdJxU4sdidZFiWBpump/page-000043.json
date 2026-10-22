@@ -1,0 +1,15 @@
+{
+  "coverage": "mint_address_only_not_all_pools",
+  "decoded_trade_events": 1,
+  "mint": "3xr8F1c8XcNJCFtzJgEAV8kNGrdJxU4sdidZFiWBpump",
+  "next_cursor": "4XY2ZtNFL6YMG5Sz32HiFuPJc7Xe5sBWFiVgCQuoMJMrBmiweuwfCQ3hL2rZEHRDFXHofUB5Tg37baacLpv4qRon",
+  "page": 43,
+  "raw_receipt": "slot=459296339 signature=4yuEUq79MaDe86GDo9Wq6yQgFYeYuPxGhEWdpwZZmsW5MMLULJAUagd749hFt9gF1DymZNDrDTqwjNQM1TmWCHQC mint=3xr8F1c8XcNJCFtzJgEAV8kNGrdJxU4sdidZFiWBpump side=SELL timestamp_s=1792513747 price_sol=0.00000010397942 token_raw=1100390520980 sol_lamports=114417968\ntf_seconds=1 observed_candles=1 reconstructed_trade_count=1 source_coverage=partial\ncandle tf_s=1 start_s=1792513747 open_sol=0.00000010397942 high_sol=0.00000010397942 low_sol=0.00000010397942 close_sol=0.00000010397942 volume_lamports=114417968 volume_token_raw=1100390520980 trades=1 open_close_order_verified=true\ntf_seconds=30 observed_candles=1 reconstructed_trade_count=1 source_coverage=partial\ncandle tf_s=30 start_s=1792513740 open_sol=0.00000010397942 high_sol=0.00000010397942 low_sol=0.00000010397942 close_sol=0.00000010397942 volume_lamports=114417968 volume_token_raw=1100390520980 trades=1 open_close_order_verified=true\ntf_seconds=600 observed_candles=1 reconstructed_trade_count=1 source_coverage=partial\ncandle tf_s=600 start_s=1792513200 open_sol=0.00000010397942 high_sol=0.00000010397942 low_sol=0.00000010397942 close_sol=0.00000010397942 volume_lamports=114417968 volume_token_raw=1100390520980 trades=1 open_close_order_verified=true\nscanned_signatures=20 pages=2 decoded_trade_events=1 reached_oldest=false next_cursor=Some(\"4XY2ZtNFL6YMG5Sz32HiFuPJc7Xe5sBWFiVgCQuoMJMrBmiweuwfCQ3hL2rZEHRDFXHofUB5Tg37baacLpv4qRon\") coverage=mint_address_only_not_all_pools ms_execution_precision=false\n",
+  "reached_oldest": false,
+  "rpc_pages": 2,
+  "scanned_signatures": 20,
+  "schema": 1,
+  "start_cursor": "2H7UoTZKMQ3oBu1WhaoHr3zwpzj7xLdQvUksBwTfQ6uUY7ibyRzgbVCBrqm9LR6B6LJBMjvKigDTU4Wax6kbCfYy",
+  "time_precision": "block_timestamp_seconds",
+  "unresolved_signatures": []
+}
