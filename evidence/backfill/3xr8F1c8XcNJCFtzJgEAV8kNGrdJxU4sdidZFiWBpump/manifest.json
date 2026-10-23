@@ -1,5 +1,5 @@
 {
-  "checkpoint_cursor": "5h8qpxPJRVRG6tn9GSXc4pppZF7TeC646GhsFgBBPdSz1jH5jTobwKuYmgJweAo3uM933neFXcQmV7kTfQQFGcbN",
+  "checkpoint_cursor": "2fwv6VyzUTDmQHShNgo1eZPXjobY5cGD6LiAjnXfiaLpvDFMgBRUvN2etxZ6JxZuizpyu5p5qBQpLhPcrXAwuN5K",
   "coverage": "mint_address_only_not_all_pools",
   "files": [
     {
@@ -193,15 +193,23 @@
     {
       "name": "page-000048.json",
       "sha256": "1b6528b189c3cb06ee4432df91052f788a6f5ec607317ae8424c6f05871a2ff9"
+    },
+    {
+      "name": "page-000049.json",
+      "sha256": "91f4ecd1b6c8164bb262df40a60cc1f547aba2c773f0c5f8f2a0907d8c5e4f27"
+    },
+    {
+      "name": "page-000050.json",
+      "sha256": "4d94f29348bdfb192436716585b2407ddaee695b91bf2a3bda5845230768b0a1"
     }
   ],
   "historical_complete": false,
   "mint": "3xr8F1c8XcNJCFtzJgEAV8kNGrdJxU4sdidZFiWBpump",
-  "scanned_signatures": 960,
+  "scanned_signatures": 1000,
   "schema": 1,
   "source": "Solana finalized JSON-RPC Pump.fun event decoder",
   "timestamp_precision": "seconds_not_ms",
-  "trade_event_count": 470,
+  "trade_event_count": 477,
   "unresolved_signatures": [
     "g1eLGnBzELSir83Wc3NeH3XmD7JdzMgQPqWwEEivT9paLj8TouLpg89RcN72tad2PK6zRHhEoZFD5x1SEW62hAE",
     "2znbsqg3Yv3VH24JCAH5s4uqF7GkxhhCdY7j1vSXYjF5X5HXonD58CWfudujPfNKrDjEZq6B8BuNyEy6hVt7f2jk",

@@ -1,0 +1,15 @@
+{
+  "coverage": "mint_address_only_not_all_pools",
+  "decoded_trade_events": 3,
+  "mint": "3xr8F1c8XcNJCFtzJgEAV8kNGrdJxU4sdidZFiWBpump",
+  "next_cursor": "2fwv6VyzUTDmQHShNgo1eZPXjobY5cGD6LiAjnXfiaLpvDFMgBRUvN2etxZ6JxZuizpyu5p5qBQpLhPcrXAwuN5K",
+  "page": 50,
+  "raw_receipt": "slot=459296330 signature=3q6aSjUUntDVg57YpkkvgN8K6H4SXdAsPg8ped2Bt1qeieimaCsRx462ZrrboJ5hpJ6gtfVm7VcoSLiSiyy326sy mint=3xr8F1c8XcNJCFtzJgEAV8kNGrdJxU4sdidZFiWBpump side=BUY timestamp_s=1792513746 price_sol=0.00000009829107 token_raw=1004826082892 sol_lamports=98765431\nslot=459296330 signature=5j8GSHsFvmCgn7ynwgAN7m2NUiPwfBzfhzpEYTEwcHvurQM5xgKTm2EttiD8hqhLj7ne3SaSmUbGXmuVrYAa9KBJ mint=3xr8F1c8XcNJCFtzJgEAV8kNGrdJxU4sdidZFiWBpump side=BUY timestamp_s=1792513746 price_sol=0.00000009803047 token_raw=515133859899 sol_lamports=50498816\nslot=459296328 signature=43CQ3GyPYZjJ1geP8aBNkSdzcNqVa3jYHCEJiK3D3ocHbZ5JKDPWzWBUbVEBDtHuA72jApQSFHs2cEoJEzCAakGx mint=3xr8F1c8XcNJCFtzJgEAV8kNGrdJxU4sdidZFiWBpump side=SELL timestamp_s=1792513745 price_sol=0.00000009796186 token_raw=113969080357 sol_lamports=11164623\ntf_seconds=1 observed_candles=2 reconstructed_trade_count=3 source_coverage=partial\ncandle tf_s=1 start_s=1792513746 open_sol=0.00000009829107 high_sol=0.00000009829107 low_sol=0.00000009803047 close_sol=0.00000009803047 volume_lamports=149264247 volume_token_raw=1519959942791 trades=2 open_close_order_verified=false\ncandle tf_s=1 start_s=1792513745 open_sol=0.00000009796186 high_sol=0.00000009796186 low_sol=0.00000009796186 close_sol=0.00000009796186 volume_lamports=11164623 volume_token_raw=113969080357 trades=1 open_close_order_verified=true\ntf_seconds=30 observed_candles=1 reconstructed_trade_count=3 source_coverage=partial\ncandle tf_s=30 start_s=1792513740 open_sol=0.00000009796186 high_sol=0.00000009829107 low_sol=0.00000009796186 close_sol=0.00000009803047 volume_lamports=160428870 volume_token_raw=1633929023148 trades=3 open_close_order_verified=false\ntf_seconds=600 observed_candles=1 reconstructed_trade_count=3 source_coverage=partial\ncandle tf_s=600 start_s=1792513200 open_sol=0.00000009796186 high_sol=0.00000009829107 low_sol=0.00000009796186 close_sol=0.00000009803047 volume_lamports=160428870 volume_token_raw=1633929023148 trades=3 open_close_order_verified=false\nscanned_signatures=20 pages=2 decoded_trade_events=3 reached_oldest=false next_cursor=Some(\"2fwv6VyzUTDmQHShNgo1eZPXjobY5cGD6LiAjnXfiaLpvDFMgBRUvN2etxZ6JxZuizpyu5p5qBQpLhPcrXAwuN5K\") coverage=mint_address_only_not_all_pools ms_execution_precision=false\n",
+  "reached_oldest": false,
+  "rpc_pages": 2,
+  "scanned_signatures": 20,
+  "schema": 1,
+  "start_cursor": "2Bp1SNNRUTyAuoKJv3vMM9sufFqQPYSML2QtPTokQgFqVoq9BZMpCcEhqXDVi9uy6YS1ucuCXByxjTMqteRC4bFs",
+  "time_precision": "block_timestamp_seconds",
+  "unresolved_signatures": []
+}
