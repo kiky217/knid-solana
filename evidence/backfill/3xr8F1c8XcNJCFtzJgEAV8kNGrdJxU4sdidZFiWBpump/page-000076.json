@@ -1,0 +1,15 @@
+{
+  "coverage": "mint_address_only_not_all_pools",
+  "decoded_trade_events": 2,
+  "mint": "3xr8F1c8XcNJCFtzJgEAV8kNGrdJxU4sdidZFiWBpump",
+  "next_cursor": "3vHuhGXxNJLtNnQeKsFog12iRPvdu62nHSCfngEqebPHsF6pW5CL2jf7jHRmTJypUGLz9THGuPHYaWvxmw3Nakfn",
+  "page": 76,
+  "raw_receipt": "slot=459296294 signature=iaro9Mi2bCNvh8ypwnv2WA7UUbAjZSZvonCx4LjQQ414epBm85TtA7QwmDmTCefZ4wwjGNZ11EZ1tas5yw5k9KZ mint=3xr8F1c8XcNJCFtzJgEAV8kNGrdJxU4sdidZFiWBpump side=BUY timestamp_s=1792513738 price_sol=0.00000008057742 token_raw=11360834721438 sol_lamports=915426788\nslot=459296294 signature=4dB2isD8FHJkZiAeirLATW44ma6DabJQwjmBzfHrCpL5XwTfPFa25Zy2Uw2QsXyHptsK9RH482NqmiELrWJYjpt4 mint=3xr8F1c8XcNJCFtzJgEAV8kNGrdJxU4sdidZFiWBpump side=BUY timestamp_s=1792513738 price_sol=0.00000007751113 token_raw=13419088707065 sol_lamports=1040128766\ntf_seconds=1 observed_candles=1 reconstructed_trade_count=2 source_coverage=partial\ncandle tf_s=1 start_s=1792513738 open_sol=0.00000007751113 high_sol=0.00000008057742 low_sol=0.00000007751113 close_sol=0.00000008057742 volume_lamports=1955555554 volume_token_raw=24779923428503 trades=2 open_close_order_verified=false\ntf_seconds=30 observed_candles=1 reconstructed_trade_count=2 source_coverage=partial\ncandle tf_s=30 start_s=1792513710 open_sol=0.00000007751113 high_sol=0.00000008057742 low_sol=0.00000007751113 close_sol=0.00000008057742 volume_lamports=1955555554 volume_token_raw=24779923428503 trades=2 open_close_order_verified=false\ntf_seconds=600 observed_candles=1 reconstructed_trade_count=2 source_coverage=partial\ncandle tf_s=600 start_s=1792513200 open_sol=0.00000007751113 high_sol=0.00000008057742 low_sol=0.00000007751113 close_sol=0.00000008057742 volume_lamports=1955555554 volume_token_raw=24779923428503 trades=2 open_close_order_verified=false\nscanned_signatures=20 pages=2 decoded_trade_events=2 reached_oldest=false next_cursor=Some(\"3vHuhGXxNJLtNnQeKsFog12iRPvdu62nHSCfngEqebPHsF6pW5CL2jf7jHRmTJypUGLz9THGuPHYaWvxmw3Nakfn\") coverage=mint_address_only_not_all_pools ms_execution_precision=false\n",
+  "reached_oldest": false,
+  "rpc_pages": 2,
+  "scanned_signatures": 20,
+  "schema": 1,
+  "start_cursor": "5GF3FLWEC8sUbno7Q3L3pAAwvw2pPx6zMYAq2qjCmbWAW8SJQoVadQrnWoh4sqCVSVaaj58YV66R3LXiumKxXz3n",
+  "time_precision": "block_timestamp_seconds",
+  "unresolved_signatures": []
+}
