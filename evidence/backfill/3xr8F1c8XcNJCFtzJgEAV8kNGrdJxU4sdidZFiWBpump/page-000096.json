@@ -1,0 +1,15 @@
+{
+  "coverage": "mint_address_only_not_all_pools",
+  "decoded_trade_events": 3,
+  "mint": "3xr8F1c8XcNJCFtzJgEAV8kNGrdJxU4sdidZFiWBpump",
+  "next_cursor": "GY9FF9mTHf2vxajiquufuSdCN5Bs2wt3FEx7SddN94bacPFo19WidRWnaqbTE3j5SxFG5FeoZE7WuXAEAvn3g7j",
+  "page": 96,
+  "raw_receipt": "slot=459296277 signature=3j8XoS2BGRuQELsCuWBxRprcvMW47YZsnZkLy1agCtviTK4XAEdYFAYck6R4UXHmueVmUCaHpZYKThxrgoEoRdYz mint=3xr8F1c8XcNJCFtzJgEAV8kNGrdJxU4sdidZFiWBpump side=BUY timestamp_s=1792513734 price_sol=0.00000007367674 token_raw=17872891193286 sol_lamports=1316816373\nslot=459296276 signature=3JmGjq1zLNFvN5V5suXLoH1dVfYYxNgZCFQgko8upWBu89gDq5XnRe4YzpD1i54dJgXm6FPTLdQnCGhUccqZkJRz mint=3xr8F1c8XcNJCFtzJgEAV8kNGrdJxU4sdidZFiWBpump side=BUY timestamp_s=1792513734 price_sol=0.00000006970752 token_raw=19259210699399 sol_lamports=1342511815\nslot=459296276 signature=23tzsban7b43vcEwbRryyAqw5AWXMc88qwpbWTg7RhPNiRsR79rNpT1hCD7nRqc8xKBgRD7wLB6ge1pf77731QsV mint=3xr8F1c8XcNJCFtzJgEAV8kNGrdJxU4sdidZFiWBpump side=BUY timestamp_s=1792513734 price_sol=0.00000006594356 token_raw=18982640031513 sol_lamports=1251782921\ntf_seconds=1 observed_candles=1 reconstructed_trade_count=3 source_coverage=partial\ncandle tf_s=1 start_s=1792513734 open_sol=0.00000006594356 high_sol=0.00000007367674 low_sol=0.00000006594356 close_sol=0.00000007367674 volume_lamports=3911111109 volume_token_raw=56114741924198 trades=3 open_close_order_verified=false\ntf_seconds=30 observed_candles=1 reconstructed_trade_count=3 source_coverage=partial\ncandle tf_s=30 start_s=1792513710 open_sol=0.00000006594356 high_sol=0.00000007367674 low_sol=0.00000006594356 close_sol=0.00000007367674 volume_lamports=3911111109 volume_token_raw=56114741924198 trades=3 open_close_order_verified=false\ntf_seconds=600 observed_candles=1 reconstructed_trade_count=3 source_coverage=partial\ncandle tf_s=600 start_s=1792513200 open_sol=0.00000006594356 high_sol=0.00000007367674 low_sol=0.00000006594356 close_sol=0.00000007367674 volume_lamports=3911111109 volume_token_raw=56114741924198 trades=3 open_close_order_verified=false\nscanned_signatures=20 pages=2 decoded_trade_events=3 reached_oldest=false next_cursor=Some(\"GY9FF9mTHf2vxajiquufuSdCN5Bs2wt3FEx7SddN94bacPFo19WidRWnaqbTE3j5SxFG5FeoZE7WuXAEAvn3g7j\") coverage=mint_address_only_not_all_pools ms_execution_precision=false\n",
+  "reached_oldest": false,
+  "rpc_pages": 2,
+  "scanned_signatures": 20,
+  "schema": 1,
+  "start_cursor": "2NWZq986vFkifyyeqTfRX1KD5XSr3h4EuLG3a8qFcoqFbsAmfqkZCtPoUQgzpktcxhJwoZEnCmZKuRSRoiztuahi",
+  "time_precision": "block_timestamp_seconds",
+  "unresolved_signatures": []
+}
