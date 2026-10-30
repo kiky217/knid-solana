@@ -1,0 +1,15 @@
+{
+  "coverage": "mint_address_only_not_all_pools",
+  "decoded_trade_events": 0,
+  "mint": "3xr8F1c8XcNJCFtzJgEAV8kNGrdJxU4sdidZFiWBpump",
+  "next_cursor": "5v8wgcSJYdNAyAc2dL8we1TUeeHqD7UVJqpCaR9AeU5MURE3vJn7pZ4zBjCCEAgiJRveJNiFk8gfZMUdqtUC6NNv",
+  "page": 109,
+  "raw_receipt": "tf_seconds=1 observed_candles=0 reconstructed_trade_count=0 source_coverage=partial\ntf_seconds=30 observed_candles=0 reconstructed_trade_count=0 source_coverage=partial\ntf_seconds=600 observed_candles=0 reconstructed_trade_count=0 source_coverage=partial\nscanned_signatures=20 pages=2 decoded_trade_events=0 reached_oldest=false next_cursor=Some(\"5v8wgcSJYdNAyAc2dL8we1TUeeHqD7UVJqpCaR9AeU5MURE3vJn7pZ4zBjCCEAgiJRveJNiFk8gfZMUdqtUC6NNv\") coverage=mint_address_only_not_all_pools ms_execution_precision=false\n",
+  "reached_oldest": false,
+  "rpc_pages": 2,
+  "scanned_signatures": 20,
+  "schema": 1,
+  "start_cursor": "2L9cr9Gc5k9MGmKDZDz7Yd9sZSXabqFM5e9zMkQUUpLXnCpQ1J7UQyVXoKduVZhvDxZ3dFcAz511tj4SpkGGgcih",
+  "time_precision": "block_timestamp_seconds",
+  "unresolved_signatures": []
+}
