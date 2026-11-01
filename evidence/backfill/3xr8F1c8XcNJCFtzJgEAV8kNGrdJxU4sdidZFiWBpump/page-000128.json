@@ -1,0 +1,15 @@
+{
+  "coverage": "mint_address_only_not_all_pools",
+  "decoded_trade_events": 1,
+  "mint": "3xr8F1c8XcNJCFtzJgEAV8kNGrdJxU4sdidZFiWBpump",
+  "next_cursor": null,
+  "page": 128,
+  "raw_receipt": "slot=459296252 signature=3zQSnja7omxKWdcciaYvbs6T6RKWmvdWq6QAkgai6e5uuobVcVBFmqVVuR3dQpMfZvjVovGAskYitrsuK8WdfRxc mint=3xr8F1c8XcNJCFtzJgEAV8kNGrdJxU4sdidZFiWBpump side=BUY timestamp_s=1792513729 price_sol=0.00000002849003 token_raw=20000000000000 sol_lamports=569800570\ntf_seconds=1 observed_candles=1 reconstructed_trade_count=1 source_coverage=partial\ncandle tf_s=1 start_s=1792513729 open_sol=0.00000002849003 high_sol=0.00000002849003 low_sol=0.00000002849003 close_sol=0.00000002849003 volume_lamports=569800570 volume_token_raw=20000000000000 trades=1 open_close_order_verified=true\ntf_seconds=30 observed_candles=1 reconstructed_trade_count=1 source_coverage=partial\ncandle tf_s=30 start_s=1792513710 open_sol=0.00000002849003 high_sol=0.00000002849003 low_sol=0.00000002849003 close_sol=0.00000002849003 volume_lamports=569800570 volume_token_raw=20000000000000 trades=1 open_close_order_verified=true\ntf_seconds=600 observed_candles=1 reconstructed_trade_count=1 source_coverage=partial\ncandle tf_s=600 start_s=1792513200 open_sol=0.00000002849003 high_sol=0.00000002849003 low_sol=0.00000002849003 close_sol=0.00000002849003 volume_lamports=569800570 volume_token_raw=20000000000000 trades=1 open_close_order_verified=true\nscanned_signatures=1 pages=1 decoded_trade_events=1 reached_oldest=true next_cursor=None coverage=mint_address_only_not_all_pools ms_execution_precision=false\n",
+  "reached_oldest": true,
+  "rpc_pages": 1,
+  "scanned_signatures": 1,
+  "schema": 1,
+  "start_cursor": "4fXLe3twq7CtHzgSH4ecBWQyHd6Pw7FhWiDBjkoSD32FxavNvTsr9VdidyWTt6BjGc8aQb1T7nAA9BZrFLB8tK1W",
+  "time_precision": "block_timestamp_seconds",
+  "unresolved_signatures": []
+}
